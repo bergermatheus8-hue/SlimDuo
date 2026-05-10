@@ -190,9 +190,11 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
 .btn-save-key { margin-top: 14px; width: 100%; padding: 14px; background: var(--accent); color: #0e0f11; border: none; border-radius: 999px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem; cursor: pointer; }
 .btn-test-key { margin-top: 10px; width: 100%; padding: 14px; background: transparent; border: 1.5px solid var(--accent2); border-radius: 999px; color: var(--accent2); font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem; cursor: pointer; }
 .btn-debug { margin-top: 8px; width: 100%; padding: 12px; background: transparent; border: 1.5px solid var(--border); border-radius: 999px; color: var(--text3); font-family: 'DM Sans', sans-serif; font-size: .85rem; cursor: pointer; }
-.profile-settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 10px; }
+.profile-settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .profile-settings-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; }
 .profile-settings-meta { font-size: .78rem; color: var(--text2); margin-top: 2px; }
+.btn-delete-profile { padding: 8px 14px; background: rgba(245,100,160,.1); border: 1px solid rgba(245,100,160,.3); border-radius: 999px; color: var(--accent3); font-family: 'DM Sans', sans-serif; font-size: .78rem; cursor: pointer; flex-shrink: 0; transition: all .2s; }
+.btn-delete-profile:active { transform: scale(.95); }
 .btn-add-profile { width: 100%; padding: 14px; background: transparent; border: 1.5px dashed var(--border); border-radius: var(--radius); color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: .9rem; cursor: pointer; margin-top: 4px; }
 .debug-overlay { position: fixed; inset: 0; background: rgba(14,15,17,.97); z-index: 200; display: none; flex-direction: column; padding: 52px 20px 20px; }
 .debug-overlay.active { display: flex; }
@@ -323,11 +325,88 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
     <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:20%"></div></div>
   </div>
   <div class="onboard-body">
-    <div class="step active" id="step-1"><div class="step-label">Passo 1 de 5</div><div class="step-question">Qual é o seu nome?</div><div class="form-group"><label class="form-label">Nome</label><input type="text" class="form-input" id="inp-name" placeholder="ex: Matheus" maxlength="20"></div></div>
-    <div class="step" id="step-2"><div class="step-label">Passo 2 de 5</div><div class="step-question">Sexo biológico?</div><p style="font-size:.82rem;color:var(--text2);margin-bottom:20px">Necessário para a fórmula Mifflin-St Jeor</p><div class="gender-toggle"><button class="gender-btn active" id="btn-m" onclick="selectGender('M')">♂ Masculino</button><button class="gender-btn" id="btn-f" onclick="selectGender('F')">♀ Feminino</button></div></div>
-    <div class="step" id="step-3"><div class="step-label">Passo 3 de 5</div><div class="step-question">Seus dados físicos</div><div class="form-group"><label class="form-label">Idade (anos)</label><input type="number" class="form-input" id="inp-age" placeholder="ex: 23" min="10" max="99"></div><div class="form-group"><label class="form-label">Peso atual (kg)</label><input type="number" class="form-input" id="inp-weight" placeholder="ex: 80" min="30" max="300" step="0.1"></div><div class="form-group"><label class="form-label">Altura (cm)</label><input type="number" class="form-input" id="inp-height" placeholder="ex: 178" min="100" max="250"></div></div>
-    <div class="step" id="step-4"><div class="step-label">Passo 4 de 5</div><div class="step-question">Nível de atividade física</div><div class="activity-grid"><button class="activity-btn" onclick="selectActivity(1.2,this)"><strong>😴 Sedentário</strong><small>Pouco ou nenhum exercício</small></button><button class="activity-btn" onclick="selectActivity(1.375,this)"><strong>🚶 Levemente ativo</strong><small>Exercício 1–3x por semana</small></button><button class="activity-btn active" onclick="selectActivity(1.55,this)"><strong>🏃 Moderadamente ativo</strong><small>Exercício 3–5x por semana</small></button><button class="activity-btn" onclick="selectActivity(1.725,this)"><strong>🏋️ Muito ativo</strong><small>Exercício pesado 6–7x por semana</small></button></div></div>
-    <div class="step" id="step-5"><div class="step-label">Passo 5 de 5</div><div class="step-question">Meta de peso (opcional)</div><div class="form-group"><label class="form-label">Peso alvo (kg)</label><input type="number" class="form-input" id="inp-goal" placeholder="ex: 70" min="30" max="300" step="0.1"></div><div style="margin-top:24px"><div class="section-title">Seus números</div><div class="tmb-card"><div class="tmb-card-label">TMB — Taxa Metabólica Basal</div><div class="tmb-value" id="res-tmb">—</div><div class="tmb-desc">kcal em repouso total</div></div><div class="tmb-row"><div class="tmb-mini"><div class="tmb-mini-val" id="res-tdee">—</div><div class="tmb-mini-label">TDEE (gasto total/dia)</div></div><div class="tmb-mini"><div class="tmb-mini-val" id="res-target">—</div><div class="tmb-mini-label">Meta c/ déficit 500kcal</div></div></div><p style="font-size:.78rem;color:var(--text2);line-height:1.5;background:var(--surface2);border-radius:var(--radius-sm);padding:12px">💡 Déficit de ~500 kcal/dia = ~0,5kg/semana — ritmo saudável e sustentável.</p></div></div>
+    <!-- PASSO 1: Nome -->
+    <div class="step active" id="step-1">
+      <div class="step-label">Passo 1 de 6</div>
+      <div class="step-question">Qual é o seu nome?</div>
+      <div class="form-group"><label class="form-label">Nome</label><input type="text" class="form-input" id="inp-name" placeholder="ex: Matheus" maxlength="20"></div>
+    </div>
+
+    <!-- PASSO 2: Sexo -->
+    <div class="step" id="step-2">
+      <div class="step-label">Passo 2 de 6</div>
+      <div class="step-question">Sexo biológico?</div>
+      <p style="font-size:.82rem;color:var(--text2);margin-bottom:20px">Necessário para a fórmula Mifflin-St Jeor</p>
+      <div class="gender-toggle"><button class="gender-btn active" id="btn-m" onclick="selectGender('M')">♂ Masculino</button><button class="gender-btn" id="btn-f" onclick="selectGender('F')">♀ Feminino</button></div>
+    </div>
+
+    <!-- PASSO 3: Dados físicos -->
+    <div class="step" id="step-3">
+      <div class="step-label">Passo 3 de 6</div>
+      <div class="step-question">Seus dados físicos</div>
+      <div class="form-group"><label class="form-label">Idade (anos)</label><input type="number" class="form-input" id="inp-age" placeholder="ex: 23" min="10" max="99"></div>
+      <div class="form-group"><label class="form-label">Peso atual (kg)</label><input type="number" class="form-input" id="inp-weight" placeholder="ex: 80" min="30" max="300" step="0.1"></div>
+      <div class="form-group"><label class="form-label">Altura (cm)</label><input type="number" class="form-input" id="inp-height" placeholder="ex: 178" min="100" max="250"></div>
+    </div>
+
+    <!-- PASSO 4: Peso alvo -->
+    <div class="step" id="step-4">
+      <div class="step-label">Passo 4 de 6</div>
+      <div class="step-question">Qual é sua meta de peso?</div>
+      <div class="form-group"><label class="form-label">Peso alvo (kg) — opcional</label><input type="number" class="form-input" id="inp-goal" placeholder="ex: 70" min="30" max="300" step="0.1"></div>
+      <p style="font-size:.82rem;color:var(--text2);line-height:1.6;margin-top:4px">Se preencher, o app vai calcular em quantos dias você vai atingir essa meta com base no seu déficit diário.</p>
+    </div>
+
+    <!-- PASSO 5: Metas diárias -->
+    <div class="step" id="step-5">
+      <div class="step-label">Passo 5 de 6</div>
+      <div class="step-question">Suas metas diárias</div>
+
+      <div class="form-group">
+        <label class="form-label">🔥 Déficit calórico diário alvo (kcal)</label>
+        <div class="activity-grid" id="deficit-grid">
+          <button class="activity-btn" onclick="selectDeficit(300,this)"><strong>🐢 Suave — 300 kcal/dia</strong><small>Perda de ~0,27kg/semana · Mais fácil de manter</small></button>
+          <button class="activity-btn active" onclick="selectDeficit(500,this)"><strong>⚖️ Moderado — 500 kcal/dia</strong><small>Perda de ~0,45kg/semana · Recomendado</small></button>
+          <button class="activity-btn" onclick="selectDeficit(700,this)"><strong>🚀 Intenso — 700 kcal/dia</strong><small>Perda de ~0,64kg/semana · Exige disciplina</small></button>
+          <button class="activity-btn" onclick="selectDeficit(1000,this)"><strong>⚡ Agressivo — 1000 kcal/dia</strong><small>Perda de ~0,9kg/semana · Muito restritivo</small></button>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:24px">
+        <label class="form-label">💧 Meta de água diária (litros)</label>
+        <div class="activity-grid" id="water-grid">
+          <button class="activity-btn" onclick="selectWaterGoal(2,this)"><strong>2 litros/dia</strong><small>Mínimo recomendado</small></button>
+          <button class="activity-btn active" onclick="selectWaterGoal(2.5,this)"><strong>2,5 litros/dia</strong><small>Bom para o dia a dia</small></button>
+          <button class="activity-btn" onclick="selectWaterGoal(3,this)"><strong>3 litros/dia</strong><small>Ótimo para emagrecimento</small></button>
+          <button class="activity-btn" onclick="selectWaterGoal(3.5,this)"><strong>3,5 litros/dia</strong><small>Para quem treina muito</small></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASSO 6: Resumo TMB -->
+    <div class="step" id="step-6">
+      <div class="step-label">Passo 6 de 6</div>
+      <div class="step-question">Seus números! 🎉</div>
+      <div class="tmb-card">
+        <div class="tmb-card-label">TMB — Taxa Metabólica Basal</div>
+        <div class="tmb-value" id="res-tmb">—</div>
+        <div class="tmb-desc">kcal que seu corpo gasta em repouso total</div>
+      </div>
+      <div class="tmb-row">
+        <div class="tmb-mini"><div class="tmb-mini-val" id="res-base">—</div><div class="tmb-mini-label">Gasto base diário (TMB×1.2)</div></div>
+        <div class="tmb-mini"><div class="tmb-mini-val" id="res-deficit-goal">—</div><div class="tmb-mini-label">Seu déficit alvo</div></div>
+      </div>
+      <div id="res-projection-wrap" style="display:none">
+        <div class="tmb-card" style="background:linear-gradient(135deg,rgba(200,245,100,.08),rgba(100,200,245,.05));border-color:rgba(200,245,100,.2)">
+          <div class="tmb-card-label">⏱️ Projeção para a meta</div>
+          <div class="tmb-value" id="res-days" style="font-size:2rem">—</div>
+          <div class="tmb-desc" id="res-projection-desc">dias estimados para atingir seu peso alvo</div>
+        </div>
+      </div>
+      <p style="font-size:.78rem;color:var(--text2);line-height:1.5;background:var(--surface2);border-radius:var(--radius-sm);padding:12px;margin-top:12px">
+        💡 O cálculo do déficit usa a Opção B (método NEAT): <strong>TMB × 1.2 + calorias do treino do dia − calorias ingeridas</strong>. Isso é mais preciso porque você registra o treino separadamente.
+      </p>
+    </div>
   </div>
   <div class="step-nav"><button class="btn-secondary" onclick="onboardBack()">← Anterior</button><button class="btn-primary" onclick="onboardNext()" id="btn-next-step" style="flex:1">Próximo →</button></div>
 </div>
@@ -352,7 +431,7 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
     <div class="habit-row">
       <div class="habit-card"><div class="habit-icon">🔥</div><div class="habit-label">Déficit</div><div class="habit-status" id="hab-deficit">✗</div></div>
       <div class="habit-card"><div class="habit-icon">💪</div><div class="habit-label">Treino</div><div class="habit-status" id="hab-treino">✗</div></div>
-      <div class="habit-card"><div class="habit-icon">💧</div><div class="habit-label">+3L água</div><div class="habit-status" id="hab-agua">✗</div></div>
+      <div class="habit-card"><div class="habit-icon">💧</div><div class="habit-label" id="hab-agua-label">Água</div><div class="habit-status" id="hab-agua">✗</div></div>
     </div>
     <div class="section-title">Registros do dia</div>
     <div class="empty-state" id="empty-state"><div class="empty-icon">🎙️</div><div class="empty-title">Nenhum registro ainda</div><p class="empty-desc">Toque no microfone e fale o que comeu, treinou ou bebeu!</p></div>
@@ -510,39 +589,96 @@ async function testApiKey(){
 }
 function renderProfilesSettings(){
   const l=document.getElementById('profiles-settings-list');l.innerHTML='';
-  S.profiles.forEach(p=>{const d=document.createElement('div');d.className='profile-settings-card';d.innerHTML=`<div class="profile-settings-name">${p.name}</div><div class="profile-settings-meta">${p.gender==='M'?'Homem':'Mulher'} · ${p.age}a · ${p.weight}kg · TMB ${p.tmb} kcal</div>`;l.appendChild(d);});
+  S.profiles.forEach((p,i)=>{
+    const d=document.createElement('div');d.className='profile-settings-card';
+    d.innerHTML=`
+      <div>
+        <div class="profile-settings-name">${p.name}</div>
+        <div class="profile-settings-meta">${p.gender==='M'?'Homem':'Mulher'} · ${p.age}a · ${p.weight}kg · TMB ${p.tmb} kcal</div>
+      </div>
+      <button class="btn-delete-profile" onclick="deleteProfile(${i})">🗑️ Excluir</button>`;
+    l.appendChild(d);
+  });
+}
+function deleteProfile(idx){
+  const p=S.profiles[idx];
+  if(!confirm('Excluir o perfil de '+p.name+'? Todos os dados serão perdidos.')) return;
+  // Remove dados do localStorage
+  localStorage.removeItem('slimduo_ach_'+p.id);
+  localStorage.removeItem('slimduo_wlogs_'+p.id);
+  // Remove entradas desse perfil
+  Object.keys(S.entries).forEach(k=>{if(k.endsWith('_'+p.id))delete S.entries[k];});
+  // Remove perfil
+  S.profiles.splice(idx,1);
+  // Ajusta activeProfile
+  if(S.profiles.length===0){saveToStorage();showScreen('screen-welcome');return;}
+  S.activeProfile=Math.min(S.activeProfile,S.profiles.length-1);
+  saveToStorage();
+  renderProfilesSettings();
+  showToast('🗑️ Perfil de '+p.name+' excluído.');
+  renderHome();
 }
 
 // ═══════════════════════════════════════
 // ONBOARDING
 // ═══════════════════════════════════════
+const TOTAL_STEPS=6;
 function startOnboarding(){
-  S.tempProfile={name:'',gender:'M',age:null,weight:null,height:null,activityFactor:1.55,goalWeight:null};
+  S.tempProfile={name:'',gender:'M',age:null,weight:null,height:null,goalWeight:null,deficitGoal:500,waterGoal:2.5};
   const is2=S.profiles.length===1;
   document.getElementById('onboard-profile-label').textContent=is2?'dela':'seu';
-  document.getElementById('onboard-sub').textContent=is2?'Agora os dados dela':'Vamos calcular seu metabolismo basal';
+  document.getElementById('onboard-sub').textContent=is2?'Agora os dados dela':'Vamos montar seu perfil';
   document.getElementById('btn-m').classList.add('active');document.getElementById('btn-f').classList.remove('active');
-  document.querySelectorAll('.activity-btn').forEach((b,i)=>b.classList.toggle('active',i===2));
+  document.querySelectorAll('#deficit-grid .activity-btn').forEach((b,i)=>b.classList.toggle('active',i===1));
+  document.querySelectorAll('#water-grid .activity-btn').forEach((b,i)=>b.classList.toggle('active',i===1));
   ['inp-name','inp-age','inp-weight','inp-height','inp-goal'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   goToStep(1);
 }
-function goToStep(n){document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));document.getElementById('step-'+n).classList.add('active');S.currentStep=n;document.getElementById('progress-fill').style.width=((n/5)*100)+'%';if(n===5)calcAndShowTMB();document.getElementById('btn-next-step').textContent=n===5?(S.profiles.length===1?'✅ Salvar e entrar':'✅ Salvar perfil'):'Próximo →';}
+function goToStep(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step-'+n).classList.add('active');
+  S.currentStep=n;
+  document.getElementById('progress-fill').style.width=((n/TOTAL_STEPS)*100)+'%';
+  if(n===TOTAL_STEPS)calcAndShowTMB();
+  document.getElementById('btn-next-step').textContent=n===TOTAL_STEPS?(S.profiles.length===1?'✅ Salvar e entrar':'✅ Salvar perfil'):'Próximo →';
+}
 function onboardNext(){
   const s=S.currentStep;
   if(s===1){const v=document.getElementById('inp-name').value.trim();if(!v){showToast('⚠️ Digite seu nome!');return;}S.tempProfile.name=v;}
   if(s===3){const a=+document.getElementById('inp-age').value,w=+document.getElementById('inp-weight').value,h=+document.getElementById('inp-height').value;if(!a||!w||!h){showToast('⚠️ Preencha todos os campos!');return;}S.tempProfile.age=a;S.tempProfile.weight=w;S.tempProfile.height=h;}
-  if(s===5){saveProfile();return;}
+  if(s===4){const g=+document.getElementById('inp-goal').value;S.tempProfile.goalWeight=g||null;}
+  if(s===TOTAL_STEPS){saveProfile();return;}
   goToStep(s+1);
 }
 function onboardBack(){if(S.currentStep<=1){showScreen('screen-welcome');return;}goToStep(S.currentStep-1);}
 function selectGender(g){S.tempProfile.gender=g;document.getElementById('btn-m').classList.toggle('active',g==='M');document.getElementById('btn-f').classList.toggle('active',g==='F');}
-function selectActivity(f,el){S.tempProfile.activityFactor=f;document.querySelectorAll('.activity-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
+function selectDeficit(val,el){S.tempProfile.deficitGoal=val;document.querySelectorAll('#deficit-grid .activity-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
+function selectWaterGoal(val,el){S.tempProfile.waterGoal=val;document.querySelectorAll('#water-grid .activity-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
 function calcTMB(p){return Math.round(p.gender==='M'?(10*p.weight+6.25*p.height-5*p.age+5):(10*p.weight+6.25*p.height-5*p.age-161));}
-function calcTDEE(p){return Math.round(calcTMB(p)*p.activityFactor);}
-function calcAndShowTMB(){const p=S.tempProfile;if(!p.age||!p.weight||!p.height)return;const tmb=calcTMB(p),tdee=calcTDEE(p);document.getElementById('res-tmb').textContent=tmb+' kcal';document.getElementById('res-tdee').textContent=tdee+' kcal';document.getElementById('res-target').textContent=(tdee-500)+' kcal';}
+function calcBaseCalories(p){return Math.round(calcTMB(p)*1.2);}
+function calcAndShowTMB(){
+  const p=S.tempProfile;if(!p.age||!p.weight||!p.height)return;
+  const tmb=calcTMB(p),base=calcBaseCalories(p);
+  document.getElementById('res-tmb').textContent=tmb+' kcal';
+  document.getElementById('res-base').textContent=base+' kcal';
+  document.getElementById('res-deficit-goal').textContent='-'+(p.deficitGoal||500)+' kcal/dia';
+  const wrap=document.getElementById('res-projection-wrap');
+  if(p.goalWeight&&p.goalWeight<p.weight){
+    const kgToLose=p.weight-p.goalWeight;
+    const days=Math.ceil((kgToLose*7700)/(p.deficitGoal||500));
+    const dt=new Date(Date.now()+days*864e5);
+    document.getElementById('res-days').textContent='~'+days+' dias';
+    document.getElementById('res-projection-desc').textContent='para atingir '+p.goalWeight+'kg (por volta de '+dt.toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'})+')';
+    wrap.style.display='block';
+  } else { wrap.style.display='none'; }
+}
 function saveProfile(){
-  const g=+document.getElementById('inp-goal').value;S.tempProfile.goalWeight=g||null;
-  const p={...S.tempProfile};p.tmb=calcTMB(p);p.tdee=calcTDEE(p);p.targetCal=p.tdee-500;p.id=Date.now();p.startWeight=p.weight;p.startDate=todayKey();
+  const p={...S.tempProfile};
+  p.tmb=calcTMB(p);
+  p.baseCalories=calcBaseCalories(p);
+  p.deficitGoal=p.deficitGoal||500;
+  p.waterGoal=p.waterGoal||2.5;
+  p.id=Date.now();p.startWeight=p.weight;p.startDate=todayKey();
   S.profiles.push(p);saveToStorage();
   if(S.profiles.length===1){S.activeProfile=0;showScreen('screen-home');renderHome();document.getElementById('add-profile-nudge').style.display='block';showToast('✅ Perfil salvo! Adicione o da sua namorada 👇');}
   else{S.activeProfile=S.profiles.length-1;showScreen('screen-home');renderHome();document.getElementById('add-profile-nudge').style.display='none';showToast('🎉 Prontos para começar!');}
@@ -604,15 +740,21 @@ function updateDailyStats(){
   document.getElementById('ring-cal-in').textContent=calIn;
   document.getElementById('ring-cal-out').textContent=calOut;
   document.getElementById('ring-water').textContent=water.toFixed(1)+'L';
-  const tgt=p.targetCal||2000;
-  document.getElementById('bar-cal-in').style.width=Math.min(100,(calIn/tgt)*100)+'%';
+  // Opção B: gasto base = TMB×1.2, treino somado separado
+  const base=p.baseCalories||Math.round((p.tmb||p.baseCalories||1800)*1.2);
+  const tgt=p.deficitGoal||500;
+  const waterGoal=p.waterGoal||2.5;
+  document.getElementById('bar-cal-in').style.width=Math.min(100,(calIn/(base-tgt))*100)+'%';
   document.getElementById('bar-cal-out').style.width=Math.min(100,(calOut/600)*100)+'%';
-  document.getElementById('bar-water').style.width=Math.min(100,(water/3)*100)+'%';
-  const deficit=(p.tdee+calOut)-calIn;
+  document.getElementById('bar-water').style.width=Math.min(100,(water/waterGoal)*100)+'%';
+  // Déficit real do dia = (TMB×1.2 + calorias treino) - calorias ingeridas
+  const deficit=(base+calOut)-calIn;
   const dEl=document.getElementById('hab-deficit'),tEl=document.getElementById('hab-treino'),aEl=document.getElementById('hab-agua');
-  dEl.classList.toggle('done',deficit>=200);dEl.textContent=deficit>=200?'✓':'✗';
+  const aLbl=document.getElementById('hab-agua-label');
+  dEl.classList.toggle('done',deficit>=tgt);dEl.textContent=deficit>=tgt?'✓':'✗';
   tEl.classList.toggle('done',hasTreino);tEl.textContent=hasTreino?'✓':'✗';
-  aEl.classList.toggle('done',water>=3);aEl.textContent=water>=3?'✓':'✗';
+  aEl.classList.toggle('done',water>=waterGoal);aEl.textContent=water>=waterGoal?'✓':'✗';
+  if(aLbl)aLbl.textContent=waterGoal+'L água';
   checkAchievements(S.activeProfile);
 }
 
@@ -653,30 +795,185 @@ async function processText(transcript){
   document.getElementById('process-overlay').classList.add('active');
   const p=S.profiles[S.activeProfile];
   dlog('Enviando: "'+transcript+'"');
-  const prompt=`Analise o texto e retorne APENAS JSON válido sem markdown.
-Texto: "${transcript}"
-Usuário: ${p.gender==='M'?'Homem':'Mulher'}, ${p.age}a, ${p.weight}kg, ${p.height}cm.
-REFEIÇÃO: {"type":"meal","transcript":"resumo","calories":NUM,"protein":NUM,"carbs":NUM,"fat":NUM,"meal_name":"nome"}
-TREINO: {"type":"workout","transcript":"resumo","calories":NUM,"duration":NUM,"type_workout":"tipo","intensity":"Leve/Moderado/Intenso","muscles":"músculos"}
-ÁGUA: {"type":"water","transcript":"resumo","liters":NUM}
-OUTRO: {"type":"other","transcript":"resumo","note":"nota"}
-Numéricos sem unidade. Desconhecidos=null. SOMENTE JSON.`;
+
+  const prompt=`Você é um nutricionista e personal trainer especialista, com conhecimento profundo em tabelas nutricionais brasileiras (TACO, IBGE) e gasto energético por exercício.
+
+TAREFA: Analise o texto abaixo e extraia TODOS os registros mencionados (alimentação, treino, água, etc.).
+
+TEXTO DO USUÁRIO: "${transcript}"
+
+DADOS DO USUÁRIO:
+- Sexo: ${p.gender==='M'?'Masculino':'Feminino'}
+- Idade: ${p.age} anos
+- Peso: ${p.weight}kg
+- Altura: ${p.height}cm
+
+═══════════════════════════════════════
+REGRAS OBRIGATÓRIAS:
+═══════════════════════════════════════
+1. Retorne SEMPRE um array JSON válido: [...]. Mesmo com 1 item.
+2. Separe CADA alimento/evento em objetos distintos quando o usuário mencionar mais de uma coisa.
+3. NUNCA retorne null, undefined ou string nos campos numéricos. Use 0 apenas se absolutamente impossível estimar.
+4. Todos os valores numéricos devem ser INTEIROS (sem decimais), exceto liters que pode ter 1 casa decimal.
+5. Para porções sem peso explícito, use as porções padrão brasileiras abaixo.
+
+═══════════════════════════════════════
+CÁLCULO DE REFEIÇÕES — REFERÊNCIAS TACO:
+═══════════════════════════════════════
+Grãos e cereais (por porção padrão):
+- 1 colher de sopa de arroz branco cozido (25g): cal:32, prot:1, carb:7, gord:0
+- 1 colher de sopa de feijão cozido (30g): cal:27, prot:2, carb:5, gord:0
+- 1 concha de feijão cozido (80g): cal:72, prot:5, carb:13, gord:0
+- 1 fatia de pão de forma branco (25g): cal:62, prot:2, carb:12, gord:1
+- 1 fatia de pão integral (25g): cal:56, prot:3, carb:11, gord:1
+- 1 xícara de aveia (80g): cal:291, prot:11, carb:52, gord:5
+
+Proteínas:
+- 100g de frango grelhado (peito): cal:163, prot:31, carb:0, gord:3
+- 100g de frango cozido: cal:170, prot:30, carb:0, gord:5
+- 100g de carne bovina (patinho grelhado): cal:219, prot:30, carb:0, gord:11
+- 100g de ovo mexido: cal:148, prot:10, carb:1, gord:11
+- 1 ovo cozido inteiro (50g): cal:74, prot:6, carb:0, gord:5
+- 100g de atum em lata (escorrido): cal:132, prot:28, carb:0, gord:2
+- 100g de salmão grelhado: cal:206, prot:20, carb:0, gord:13
+- 100g de tilápia grelhada: cal:96, prot:21, carb:0, gord:1
+
+Laticínios:
+- 1 copo de leite integral (200ml): cal:122, prot:6, carb:10, gord:7
+- 1 copo de leite desnatado (200ml): cal:70, prot:7, carb:10, gord:0
+- 1 pote de iogurte grego integral (170g): cal:147, prot:17, carb:6, gord:5
+- 1 fatia de queijo mussarela (15g): cal:44, prot:3, carb:0, gord:3
+- 1 colher de sopa de requeijão (30g): cal:58, prot:2, carb:1, gord:5
+
+Frutas:
+- 1 banana prata média (80g): cal:73, prot:1, carb:19, gord:0
+- 1 banana nanica grande (120g): cal:110, prot:1, carb:28, gord:0
+- 1 maçã média (130g): cal:68, prot:0, carb:18, gord:0
+- 1 laranja média (130g): cal:62, prot:1, carb:15, gord:0
+- 1 fatia de melancia (200g): cal:36, prot:1, carb:9, gord:0
+- 10 uvas (80g): cal:55, prot:1, carb:14, gord:0
+- 1 pêra média (120g): cal:65, prot:0, carb:17, gord:0
+
+Gorduras e acompanhamentos:
+- 1 colher de sopa de azeite (10ml): cal:88, prot:0, carb:0, gord:10
+- 1 colher de sopa de manteiga (10g): cal:72, prot:0, carb:0, gord:8
+- 1 colher de sopa de azeite de oliva (10g): cal:88, prot:0, carb:0, gord:10
+- 1 colher de sopa de pasta de amendoim (16g): cal:98, prot:4, carb:3, gord:8
+
+Outros:
+- 1 fatia de pizza média (100g): cal:270, prot:11, carb:33, gord:10
+- 1 hambúrguer artesanal (200g): cal:450, prot:25, carb:30, gord:25
+- 1 coxinha média (80g): cal:227, prot:9, carb:25, gord:10
+- 1 barra de chocolate ao leite (25g): cal:135, prot:2, carb:15, gord:7
+- 1 lata de refrigerante (350ml): cal:140, prot:0, carb:37, gord:0
+- 1 copo de suco de laranja natural (200ml): cal:84, prot:1, carb:20, gord:0
+- 1 colher de sopa de açúcar (10g): cal:39, prot:0, carb:10, gord:0
+- 1 colher de sopa de mel (21g): cal:64, prot:0, carb:17, gord:0
+- Salada verde simples (100g): cal:20, prot:2, carb:3, gord:0
+- 1 colher de sopa de azeite + limão na salada: cal:88 extra
+
+SOMA: Quando houver múltiplos ingredientes em uma refeição, some os valores de cada um.
+
+═══════════════════════════════════════
+CÁLCULO DE TREINOS — GASTO CALÓRICO:
+═══════════════════════════════════════
+Use o peso do usuário (${p.weight}kg) e MET (Equivalente Metabólico):
+Fórmula: kcal = MET × peso(kg) × duração(horas)
+
+MET por modalidade e intensidade:
+- Musculação leve (1-2 séries, pouco peso): MET 3.0
+- Musculação moderada (treino padrão academia): MET 4.5  ← padrão quando não especificado
+- Musculação intensa (alta carga, HIIT com pesos): MET 6.0
+- Caminhada leve (< 4km/h): MET 2.8
+- Caminhada moderada (4-6km/h): MET 3.8
+- Corrida leve (6-8km/h): MET 6.0
+- Corrida moderada (8-10km/h): MET 8.5
+- Corrida intensa (>10km/h): MET 11.0
+- Ciclismo leve: MET 4.0
+- Ciclismo moderado: MET 8.0
+- Natação leve: MET 5.0
+- Natação moderada: MET 7.0
+- Yoga/Pilates: MET 3.0
+- Futebol: MET 7.0
+- Boxe/Luta: MET 7.8
+- Pular corda: MET 10.0
+
+Exemplo: musculação moderada 60min, 80kg = 4.5 × 80 × 1.0 = 360 kcal
+
+Grupos musculares — use os termos exatos:
+- Peito, Costas, Ombros, Bíceps, Tríceps, Pernas, Glúteos, Abdômen, Cardio
+
+═══════════════════════════════════════
+FORMATOS JSON (use EXATAMENTE esses campos):
+═══════════════════════════════════════
+Refeição:
+{"type":"meal","transcript":"descrição do que foi dito","calories":INT,"protein":INT,"carbs":INT,"fat":INT,"meal_name":"nome da refeição"}
+
+Treino:
+{"type":"workout","transcript":"descrição do treino","calories":INT,"duration":INT,"type_workout":"Musculação/Corrida/Caminhada/etc","intensity":"Leve/Moderado/Intenso","muscles":"grupos separados por vírgula"}
+
+Água/Bebida:
+{"type":"water","transcript":"descrição","liters":DECIMAL}
+
+Outro:
+{"type":"other","transcript":"descrição","note":"anotação resumida"}
+
+═══════════════════════════════════════
+RETORNE APENAS o array JSON. Sem markdown, sem explicação, sem texto adicional.
+═══════════════════════════════════════`;
+
   try{
-    const r=await fetch(getGeminiUrl(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.1,maxOutputTokens:512}})});
+    const r=await fetch(getGeminiUrl(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.1,maxOutputTokens:1024}})});
     if(!r.ok){const err=await r.text();dlog('ERRO HTTP'+r.status+':'+err.slice(0,200));if(r.status===400&&err.includes('API_KEY'))throw new Error('KEY');if(r.status===429)throw new Error('QUOTA');throw new Error('HTTP'+r.status);}
     const data=await r.json();
     const raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-    dlog('Raw:'+raw.slice(0,150));
-    const entry=JSON.parse(raw.replace(/```json|```/g,'').trim());
-    entry.time=nowTime();entry.id=Date.now();
-    const key=getEntryKey();if(!S.entries[key])S.entries[key]=[];S.entries[key].push(entry);
+    dlog('Raw:'+raw.slice(0,300));
+
+    // Limpa markdown e parseia
+    const cleaned=raw.replace(/```json|```/g,'').trim();
+    let parsed=JSON.parse(cleaned);
+
+    // Garante que é sempre array
+    if(!Array.isArray(parsed)) parsed=[parsed];
+
+    const key=getEntryKey();
+    if(!S.entries[key]) S.entries[key]=[];
+    const emojiMap={meal:'🍽️',workout:'💪',water:'💧',other:'📝'};
+    let count=0;
+
+    parsed.forEach(entry=>{
+      // Sanitiza campos numéricos — nunca undefined
+      if(entry.type==='meal'){
+        entry.calories=Number(entry.calories)||0;
+        entry.protein=Number(entry.protein)||0;
+        entry.carbs=Number(entry.carbs)||0;
+        entry.fat=Number(entry.fat)||0;
+      }
+      if(entry.type==='workout'){
+        entry.calories=Number(entry.calories)||0;
+        entry.duration=Number(entry.duration)||0;
+      }
+      if(entry.type==='water'){
+        entry.liters=Number(entry.liters)||0;
+      }
+      entry.time=nowTime();
+      entry.id=Date.now()+count;
+      S.entries[key].push(entry);
+      count++;
+    });
+
     saveToStorage();renderEntries();updateDailyStats();
     document.getElementById('process-overlay').classList.remove('active');
-    showToast(({meal:'🍽️',workout:'💪',water:'💧',other:'📝'}[entry.type]||'✅')+' Registro salvo!');
+
+    if(parsed.length===1){
+      showToast((emojiMap[parsed[0].type]||'✅')+' Registro salvo!');
+    } else {
+      showToast('✅ '+parsed.length+' registros salvos!');
+    }
     checkAchievements(S.activeProfile);
   }catch(e){
     document.getElementById('process-overlay').classList.remove('active');
-    dlog('ERRO processText:'+e.message);
+    dlog('ERRO processText:'+e.message+' | stack:'+e.stack);
     if(e.message==='KEY')showToast('❌ Chave inválida. Verifique em Configurações.',4000);
     else if(e.message==='QUOTA')showToast('⚠️ Cota esgotada. Tente em alguns minutos.',4000);
     else showToast('❌ Erro ao processar. Veja o log.',3000);
@@ -693,9 +990,16 @@ function renderSummary(){
   const entries=getTodayEntries(S.summaryP);
   const content=document.getElementById('summary-content');
   if(entries.length===0){content.innerHTML=`<div class="no-data"><div class="no-data-icon">📭</div><p>Nenhum registro hoje.<br>Use o microfone para começar!</p></div>`;return;}
-  const deficit=(p.tdee+calOut)-calIn,isD=deficit>0;
+  const base=p.baseCalories||Math.round((p.tmb||1800)*1.2);
+  const deficit=(base+calOut)-calIn,isD=deficit>0;
+  const deficitGoal=p.deficitGoal||500;
+  const waterGoal=p.waterGoal||2.5;
   const wLossG=Math.max(0,(deficit/7700)*1000),wkLoss=(deficit/7700)*7*1000;
-  const pG=Math.round(p.weight*2),cG=Math.round((p.targetCal||p.tdee-500)*.5/4),fG=Math.round((p.targetCal||p.tdee-500)*.3/9);
+  // Macro metas baseadas em calorias alvo (base - deficitGoal)
+  const caloTarget=Math.max(1200,base-deficitGoal);
+  const pG=Math.round(p.weight*2);
+  const cG=Math.round(caloTarget*.45/4);
+  const fG=Math.round(caloTarget*.25/9);
   const ck='sum_'+todayKey()+'_'+p.id;
   content.innerHTML=`
 <div class="section-title">Balanço calórico</div>
@@ -707,13 +1011,13 @@ function renderSummary(){
 <div class="mini-row">
   <div class="mini-card"><div class="mini-label">🍽️ Ingeridas</div><div class="mini-val">${calIn} kcal</div></div>
   <div class="mini-card"><div class="mini-label">⚡ Treino</div><div class="mini-val">${calOut} kcal</div></div>
-  <div class="mini-card"><div class="mini-label">🎯 Meta</div><div class="mini-val">${p.targetCal||p.tdee-500} kcal</div></div>
+  <div class="mini-card"><div class="mini-label">🎯 Alvo</div><div class="mini-val">-${deficitGoal} kcal</div></div>
 </div>
 <div class="section-title">Estimativa de perda</div>
 <div class="wloss-card">
   <div class="wloss-title">Com base no déficit de hoje</div>
   <div class="wloss-main"><div class="wloss-val">${isD?wLossG.toFixed(1):'0'}</div><div class="wloss-unit">g perdidas hoje</div></div>
-  <div class="wloss-desc">${isD?`Ritmo de ~${wkLoss.toFixed(0)}g/semana. (7.700 kcal = 1kg de gordura)`:'Amanhã é uma nova chance! 🌅'}</div>
+  <div class="wloss-desc">${isD?`Ritmo de ~${wkLoss.toFixed(0)}g/semana se mantido. (7.700 kcal = 1kg de gordura)`:'Amanhã é uma nova chance! 🌅'}</div>
 </div>
 <div class="section-title">Macronutrientes</div>
 <div class="macro-card">
@@ -725,24 +1029,26 @@ function renderSummary(){
 <div class="deficit-card">
   <div class="deficit-label">Água consumida</div>
   <div class="deficit-value" style="color:var(--accent2)">${water.toFixed(1)}L</div>
-  <div class="deficit-desc">${water>=3?'✅ Meta de 3L atingida!':'Faltam '+(3-water).toFixed(1)+'L para a meta.'}</div>
+  <div class="deficit-desc">${water>=waterGoal?'✅ Meta de '+waterGoal+'L atingida!':'Faltam '+(waterGoal-water).toFixed(1)+'L para a meta de '+waterGoal+'L.'}</div>
 </div>
 <div class="section-title">Análise por IA</div>
 <div class="ai-card">
   <div class="ai-card-header"><span style="font-size:1.2rem">🤖</span><div class="ai-card-title">Resumo do Gemini</div></div>
   <div id="ai-body">${S.aiCache[ck]?`<div class="ai-text">${S.aiCache[ck]}</div>`:'<div class="ai-text" style="color:var(--text3);font-style:italic">Toque para gerar análise personalizada do seu dia.</div>'}</div>
   <button class="btn-ai" onclick="genAiSummary(${S.summaryP},'${ck}')">${S.aiCache[ck]?'🔄 Gerar novamente':'✨ Gerar análise com IA'}</button>
-</div>`;
-}
+</div>`;}
 async function genAiSummary(pIdx,ck){
   const p=S.profiles[pIdx];
   const{calIn,calOut,water,protein,carbs,fat}=getDayStats(pIdx);
-  const deficit=(p.tdee+calOut)-calIn;
+  const base=p.baseCalories||Math.round((p.tmb||1800)*1.2);
+  const deficit=(base+calOut)-calIn;
+  const deficitGoal=p.deficitGoal||500;
+  const waterGoal=p.waterGoal||2.5;
   const body=document.getElementById('ai-body');
   body.innerHTML='<div class="ai-loading"><div class="ai-spinner"></div> Gerando análise...</div>';
   const prompt=`Você é um coach de emagrecimento motivador. Escreva um resumo de 3-4 frases em português para ${p.name}.
-Dados: Calorias: ${calIn}kcal ingeridas (meta ${p.targetCal}kcal), Treino: ${calOut}kcal, Déficit: ${deficit>0?deficit.toFixed(0)+' kcal':'Superávit '+Math.abs(deficit).toFixed(0)+' kcal'}, Proteína: ${protein.toFixed(0)}g, Carbs: ${carbs.toFixed(0)}g, Gordura: ${fat.toFixed(0)}g, Água: ${water.toFixed(1)}L.
-Reconheça positivos, sugira melhoria e finalize motivando ${p.name}. Sem markdown.`;
+Dados: Calorias ingeridas: ${calIn}kcal, Treino: ${calOut}kcal gastos, Déficit do dia: ${deficit>0?deficit.toFixed(0)+' kcal (alvo: '+deficitGoal+' kcal)':'Superávit de '+Math.abs(deficit).toFixed(0)+' kcal'}, Proteína: ${protein.toFixed(0)}g, Carbs: ${carbs.toFixed(0)}g, Gordura: ${fat.toFixed(0)}g, Água: ${water.toFixed(1)}L (meta: ${waterGoal}L).
+Reconheça pontos positivos, sugira uma melhoria objetiva e finalize com frase motivacional para ${p.name}. Sem markdown, texto corrido.`;
   try{
     const r=await fetch(getGeminiUrl(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.8,maxOutputTokens:300}})});
     if(!r.ok)throw new Error('HTTP '+r.status);
@@ -760,9 +1066,9 @@ const ACHS=[
   {id:'first_meal',icon:'🍽️',name:'Primeira Refeição',desc:'Registre sua primeira refeição',check:(p,e,st)=>e.some(x=>x.type==='meal')},
   {id:'first_workout',icon:'💪',name:'Primeiro Treino',desc:'Registre seu primeiro treino',check:(p,e,st)=>e.some(x=>x.type==='workout')},
   {id:'first_water',icon:'💧',name:'Hidratado!',desc:'Registre consumo de água',check:(p,e,st)=>e.some(x=>x.type==='water')},
-  {id:'water_goal',icon:'🌊',name:'Meta de Água',desc:'Beba 3L em um dia',check:(p,e,st)=>st.water>=3},
-  {id:'deficit_day',icon:'🔥',name:'Déficit do Dia',desc:'Feche o dia em déficit calórico',check:(p,e,st)=>(p.tdee+st.calOut)-st.calIn>=200},
-  {id:'combo',icon:'⚡',name:'Combo Perfeito',desc:'Treino + déficit no mesmo dia',check:(p,e,st)=>st.hasTreino&&(p.tdee+st.calOut)-st.calIn>=200},
+  {id:'water_goal',icon:'🌊',name:'Meta de Água',desc:'Atingir a meta de água do dia',check:(p,e,st)=>st.water>=(p.waterGoal||2.5)},
+  {id:'deficit_day',icon:'🔥',name:'Déficit do Dia',desc:'Fechar o dia em déficit calórico',check:(p,e,st)=>{const base=p.baseCalories||Math.round((p.tmb||1800)*1.2);return(base+st.calOut)-st.calIn>=(p.deficitGoal||500);}},
+  {id:'combo',icon:'⚡',name:'Combo Perfeito',desc:'Treino + déficit no mesmo dia',check:(p,e,st)=>{const base=p.baseCalories||Math.round((p.tmb||1800)*1.2);return st.hasTreino&&(base+st.calOut)-st.calIn>=(p.deficitGoal||500);}},
   {id:'streak3',icon:'🔥',name:'3 Dias Seguidos',desc:'3 dias de streak',check:(p,e,st,pi)=>calcStreak(pi)>=3},
   {id:'streak7',icon:'🌟',name:'Semana Perfeita',desc:'7 dias de streak',check:(p,e,st,pi)=>calcStreak(pi)>=7},
   {id:'streak14',icon:'🏆',name:'2 Semanas Forte',desc:'14 dias de streak',check:(p,e,st,pi)=>calcStreak(pi)>=14},
@@ -787,12 +1093,17 @@ function getLevel(xp){
 }
 function calcStreak(pi){
   const p=S.profiles[pi];if(!p)return 0;
+  const base=p.baseCalories||Math.round((p.tmb||1800)*1.2);
+  const defGoal=p.deficitGoal||500;
   let streak=0,d=new Date();
   for(let i=0;i<365;i++){
     const key=d.toISOString().split('T')[0]+'_'+p.id;
     const de=S.entries[key]||[];
-    if(de.length>0){let ci=0,co=0;de.forEach(e=>{if(e.type==='meal')ci+=e.calories||0;if(e.type==='workout')co+=e.calories||0;});if((p.tdee+co)-ci>=200)streak++;else if(i>0)break;}
-    else if(i>0)break;
+    if(de.length>0){
+      let ci=0,co=0;
+      de.forEach(e=>{if(e.type==='meal')ci+=e.calories||0;if(e.type==='workout')co+=e.calories||0;});
+      if((base+co)-ci>=defGoal)streak++;else if(i>0)break;
+    } else if(i>0)break;
     d.setDate(d.getDate()-1);
   }
   return streak;
@@ -833,12 +1144,13 @@ function logWeight(pi){
 function renderEvolution(){
   makeTabs('evo-tabs',S.evoP,i=>{S.evoP=i;renderEvolution();});
   const pi=S.evoP,p=S.profiles[pi],logs=getWeightLogs(pi);
+  const base=p.baseCalories||Math.round((p.tmb||1800)*1.2);
   const startW=p.startWeight,goalW=p.goalWeight;
   const curW=logs.length>0?logs[logs.length-1].weight:startW;
   const totalLoss=startW-curW,toGoal=goalW?curW-goalW:null;
-  let avgDef=500;
+  let avgDef=p.deficitGoal||500;
   const rd=[];
-  for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const key=d.toISOString().split('T')[0]+'_'+p.id;const de=S.entries[key]||[];if(de.length>0){let ci=0,co=0;de.forEach(e=>{if(e.type==='meal')ci+=e.calories||0;if(e.type==='workout')co+=e.calories||0;});rd.push((p.tdee+co)-ci);}}
+  for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const key=d.toISOString().split('T')[0]+'_'+p.id;const de=S.entries[key]||[];if(de.length>0){let ci=0,co=0;de.forEach(e=>{if(e.type==='meal')ci+=e.calories||0;if(e.type==='workout')co+=e.calories||0;});rd.push((base+co)-ci);}}
   if(rd.length>0)avgDef=rd.reduce((a,b)=>a+b,0)/rd.length;
   const daysToGoal=toGoal&&toGoal>0&&avgDef>0?Math.ceil((toGoal*7700)/avgDef):null;
   const projDate=daysToGoal?new Date(Date.now()+daysToGoal*864e5).toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'}):null;
