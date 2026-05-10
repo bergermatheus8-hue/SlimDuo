@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SlimDuo</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0e0f11; --surface: #16181c; --surface2: #1e2128; --border: #2a2d35;
+    --accent: #c8f564; --accent2: #64c8f5; --accent3: #f564a0;
+    --text: #f0f0ee; --text2: #8a8d96; --text3: #5a5d66;
+    --radius: 20px; --radius-sm: 12px;
+  }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 16px; line-height: 1.5; overflow: hidden; }
+  #app { height: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+  .screen { display: none; flex-direction: column; height: 100%; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; animation: fadeIn .35s ease; }
+  .screen.active { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* WELCOME */
+  #screen-welcome { justify-content: space-between; padding: 60px 28px 48px; position: relative; overflow: hidden; }
+  .welcome-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .18; }
+  .blob-1 { width: 320px; height: 320px; background: var(--accent); top: -80px; right: -80px; animation: float1 8s ease-in-out infinite; }
+  .blob-2 { width: 240px; height: 240px; background: var(--accent2); bottom: 80px; left: -60px; animation: float2 10s ease-in-out infinite; }
+  .blob-3 { width: 180px; height: 180px; background: var(--accent3); top: 40%; right: -40px; animation: float1 7s ease-in-out infinite reverse; }
+  @keyframes float1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-20px,20px) scale(1.05)} }
+  @keyframes float2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(20px,-15px) scale(1.08)} }
+  .welcome-top { position: relative; z-index: 1; }
+  .welcome-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2.6rem; letter-spacing: -2px; line-height: 1; margin-bottom: 8px; }
+  .welcome-logo span { color: var(--accent); }
+  .welcome-tagline { font-size: .95rem; color: var(--text2); font-weight: 300; font-style: italic; }
+  .welcome-mid { position: relative; z-index: 1; text-align: center; }
+  .welcome-visual { font-size: 5rem; margin-bottom: 24px; filter: drop-shadow(0 0 40px rgba(200,245,100,.3)); animation: pulse 3s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+  .welcome-headline { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.7rem; letter-spacing: -1px; line-height: 1.2; margin-bottom: 12px; }
+  .welcome-sub { font-size: .9rem; color: var(--text2); max-width: 280px; margin: 0 auto; line-height: 1.6; }
+  .welcome-bottom { position: relative; z-index: 1; }
+
+  /* BUTTONS */
+  .btn-primary { width: 100%; padding: 17px; background: var(--accent); color: #0e0f11; border: none; border-radius: 999px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: .5px; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-primary:active { transform: scale(.97); }
+  .btn-secondary { padding: 16px 20px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 999px; color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: .9rem; cursor: pointer; }
+
+  /* ONBOARDING */
+  #screen-onboarding { padding: 0; }
+  .onboard-header { padding: 52px 28px 20px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+  .back-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: .85rem; cursor: pointer; padding: 0; margin-bottom: 16px; }
+  .onboard-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.5rem; letter-spacing: -1px; margin-bottom: 4px; }
+  .onboard-title span { color: var(--accent); }
+  .onboard-sub { font-size: .85rem; color: var(--text2); }
+  .progress-bar-wrap { margin-top: 16px; height: 3px; background: var(--border); border-radius: 999px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .4s ease; }
+  .onboard-body { padding: 24px 28px 120px; flex: 1; }
+  .step { display: none; animation: fadeIn .3s ease; }
+  .step.active { display: block; }
+  .step-label { font-size: .7rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .step-question { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.3rem; letter-spacing: -.5px; margin-bottom: 24px; line-height: 1.3; }
+  .form-group { margin-bottom: 18px; }
+  .form-label { display: block; font-size: .8rem; font-weight: 500; color: var(--text2); margin-bottom: 8px; }
+  .form-input { width: 100%; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 1rem; transition: border-color .2s; -webkit-appearance: none; }
+  .form-input:focus { outline: none; border-color: var(--accent); }
+  .form-input::placeholder { color: var(--text3); }
+  .gender-toggle { display: flex; gap: 10px; }
+  .gender-btn { flex: 1; padding: 14px 12px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: .9rem; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .gender-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,245,100,.06); }
+  .activity-grid { display: flex; flex-direction: column; gap: 10px; }
+  .activity-btn { padding: 14px 16px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all .2s; text-align: left; }
+  .activity-btn strong { display: block; font-size: .95rem; margin-bottom: 2px; }
+  .activity-btn small { font-size: .78rem; color: var(--text2); }
+  .activity-btn.active { border-color: var(--accent); background: rgba(200,245,100,.06); }
+  .activity-btn.active strong { color: var(--accent); }
+  .step-nav { position: fixed; bottom: 0; left: 0; right: 0; padding: 16px 28px 32px; background: var(--bg); border-top: 1px solid var(--border); display: flex; gap: 12px; z-index: 20; }
+  .tmb-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  .tmb-card-label { font-size: .75rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; }
+  .tmb-value { font-family: 'Syne', sans-serif; font-size: 2.4rem; font-weight: 800; letter-spacing: -2px; color: var(--accent); line-height: 1; margin-bottom: 4px; }
+  .tmb-desc { font-size: .82rem; color: var(--text2); }
+  .tmb-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .tmb-mini { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; text-align: center; }
+  .tmb-mini-val { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--accent2); margin-bottom: 2px; }
+  .tmb-mini-label { font-size: .72rem; color: var(--text2); }
+
+  /* HOME */
+  #screen-home { padding: 0; }
+  .home-header { padding: 52px 24px 16px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .profile-switcher { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .profile-chips { display: flex; gap: 8px; flex: 1; flex-wrap: wrap; }
+  .profile-chip { padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--border); background: var(--surface2); color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 500; cursor: pointer; transition: all .2s; }
+  .profile-chip.active { background: var(--accent); border-color: var(--accent); color: #0e0f11; font-weight: 600; }
+  .settings-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text2); flex-shrink: 0; font-size: 1rem; }
+  .home-greeting { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.3rem; letter-spacing: -.5px; margin-bottom: 4px; }
+  .home-date { font-size: .82rem; color: var(--text2); }
+  .home-body { padding: 20px 20px 140px; flex: 1; overflow-y: auto; }
+  .section-title { font-size: .72rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; }
+  .rings-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .ring-card { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 10px; text-align: center; }
+  .ring-emoji { font-size: 1.4rem; margin-bottom: 4px; }
+  .ring-val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem; letter-spacing: -.5px; color: var(--text); }
+  .ring-label { font-size: .65rem; color: var(--text2); margin-top: 2px; }
+  .ring-bar { height: 3px; background: var(--border); border-radius: 999px; margin-top: 8px; overflow: hidden; }
+  .ring-bar-fill { height: 100%; border-radius: 999px; background: var(--accent); width: 0%; transition: width .8s ease; }
+  .empty-state { background: var(--surface); border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 32px 20px; text-align: center; margin-bottom: 20px; }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .empty-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
+  .empty-desc { font-size: .82rem; color: var(--text2); line-height: 1.5; }
+  .habit-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .habit-card { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 10px; text-align: center; }
+  .habit-icon { font-size: 1.5rem; margin-bottom: 6px; }
+  .habit-label { font-size: .7rem; color: var(--text2); }
+  .habit-status { width: 22px; height: 22px; border-radius: 50%; background: var(--surface2); border: 1.5px solid var(--border); margin: 6px auto 0; display: flex; align-items: center; justify-content: center; font-size: .7rem; color: var(--text3); }
+  .habit-status.done { background: var(--accent); border-color: var(--accent); color: #0e0f11; }
+  .add-profile-card { background: var(--surface); border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 20px; text-align: center; margin-bottom: 16px; cursor: pointer; }
+  .add-profile-card p { font-size: .85rem; color: var(--text2); margin-top: 6px; }
+
+  /* ENTRY CARDS */
+  .entry-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; animation: fadeIn .3s ease; position: relative; }
+  .entry-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .entry-type-badge { font-size: .65rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; }
+  .badge-meal { background: rgba(200,245,100,.12); color: var(--accent); }
+  .badge-workout { background: rgba(100,200,245,.12); color: var(--accent2); }
+  .badge-water { background: rgba(100,200,245,.12); color: var(--accent2); }
+  .badge-other { background: rgba(245,100,160,.12); color: var(--accent3); }
+  .entry-time { font-size: .75rem; color: var(--text3); margin-left: auto; }
+  .entry-transcript { font-size: .85rem; color: var(--text2); font-style: italic; margin-bottom: 10px; line-height: 1.4; }
+  .entry-metrics { display: flex; flex-wrap: wrap; gap: 6px; }
+  .metric-pill { font-size: .72rem; padding: 4px 10px; border-radius: 999px; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); }
+  .metric-pill strong { color: var(--text); }
+  .entry-delete { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--text3); cursor: pointer; font-size: .9rem; padding: 4px; }
+
+  /* BOTTOM NAV */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 72px; background: var(--surface); border-top: 1px solid var(--border); display: flex; align-items: center; padding: 0 8px 8px; z-index: 30; }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 8px 4px; cursor: pointer; border-radius: var(--radius-sm); border: none; background: none; }
+  .nav-icon { font-size: 1.3rem; }
+  .nav-label { font-size: .62rem; color: var(--text3); font-family: 'DM Sans', sans-serif; }
+  .nav-label.al { color: var(--accent); }
+
+  /* FAB */
+  .fab { position: fixed; bottom: 84px; right: 24px; width: 62px; height: 62px; border-radius: 50%; background: var(--accent); border: none; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; cursor: pointer; box-shadow: 0 8px 32px rgba(200,245,100,.4); z-index: 25; transition: all .2s; animation: fabGlow 3s ease-in-out infinite; }
+  @keyframes fabGlow { 0%,100%{box-shadow:0 8px 32px rgba(200,245,100,.4)} 50%{box-shadow:0 8px 48px rgba(200,245,100,.65)} }
+  .fab:active { transform: scale(.92); }
+
+  /* RECORDING OVERLAY */
+  .record-overlay { position: fixed; inset: 0; background: rgba(14,15,17,.93); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 40px; backdrop-filter: blur(12px); }
+  .record-overlay.active { display: flex; animation: fadeIn .2s ease; }
+  .record-circle { width: 120px; height: 120px; border-radius: 50%; background: var(--accent3); display: flex; align-items: center; justify-content: center; font-size: 3rem; animation: ripple 1.2s ease-in-out infinite; }
+  @keyframes ripple { 0%{box-shadow:0 0 0 0 rgba(245,100,160,.4)} 70%{box-shadow:0 0 0 30px rgba(245,100,160,0)} 100%{box-shadow:0 0 0 0 rgba(245,100,160,0)} }
+  .record-label { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.3rem; }
+  .record-time { font-size: 2rem; font-family: 'Syne', sans-serif; font-weight: 800; color: var(--accent3); letter-spacing: -1px; }
+  .record-hint { font-size: .82rem; color: var(--text2); text-align: center; line-height: 1.6; max-width: 280px; }
+  .record-stop-btn { padding: 14px 32px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 999px; color: var(--text); font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; font-size: .9rem; }
+
+  /* PROCESSING OVERLAY */
+  .process-overlay { position: fixed; inset: 0; background: rgba(14,15,17,.93); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 40px; backdrop-filter: blur(12px); }
+  .process-overlay.active { display: flex; animation: fadeIn .2s ease; }
+  .process-spinner { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--border); border-top-color: var(--accent); animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .process-label { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; }
+  .process-sub { font-size: .82rem; color: var(--text2); text-align: center; line-height: 1.5; }
+
+  /* TOAST */
+  .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 10px 20px; font-size: .85rem; color: var(--text); z-index: 100; transition: transform .35s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,.4); pointer-events: none; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  ::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- WELCOME -->
+  <div id="screen-welcome" class="screen active">
+    <div class="welcome-bg">
+      <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>
+    </div>
+    <div class="welcome-top">
+      <div class="welcome-logo">Slim<span>Duo</span></div>
+      <div class="welcome-tagline">juntos, mais leves ✨</div>
+    </div>
+    <div class="welcome-mid">
+      <div class="welcome-visual">🥗</div>
+      <div class="welcome-headline">Sua jornada começa aqui</div>
+      <p class="welcome-sub">Registre seu dia por voz, acompanhe calorias, treinos e hábitos — juntos.</p>
+    </div>
+    <div class="welcome-bottom">
+      <button class="btn-primary" onclick="showScreen('screen-onboarding'); startOnboarding()">Começar agora →</button>
+    </div>
+  </div>
+
+  <!-- ONBOARDING -->
+  <div id="screen-onboarding" class="screen">
+    <div class="onboard-header">
+      <button class="back-btn" onclick="onboardBack()">← Voltar</button>
+      <div class="onboard-title">Perfil <span id="onboard-profile-label">seu</span></div>
+      <div class="onboard-sub" id="onboard-sub">Vamos calcular seu metabolismo basal</div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:20%"></div></div>
+    </div>
+    <div class="onboard-body">
+      <div class="step active" id="step-1">
+        <div class="step-label">Passo 1 de 5</div>
+        <div class="step-question">Qual é o seu nome?</div>
+        <div class="form-group"><label class="form-label">Nome</label><input type="text" class="form-input" id="inp-name" placeholder="ex: Matheus" maxlength="20"></div>
+      </div>
+      <div class="step" id="step-2">
+        <div class="step-label">Passo 2 de 5</div>
+        <div class="step-question">Qual é o seu sexo biológico?</div>
+        <p style="font-size:.82rem;color:var(--text2);margin-bottom:20px;">Necessário para o cálculo pela fórmula Mifflin-St Jeor</p>
+        <div class="gender-toggle">
+          <button class="gender-btn active" id="btn-m" onclick="selectGender('M')">♂ Masculino</button>
+          <button class="gender-btn" id="btn-f" onclick="selectGender('F')">♀ Feminino</button>
+        </div>
+      </div>
+      <div class="step" id="step-3">
+        <div class="step-label">Passo 3 de 5</div>
+        <div class="step-question">Seus dados físicos</div>
+        <div class="form-group"><label class="form-label">Idade (anos)</label><input type="number" class="form-input" id="inp-age" placeholder="ex: 23" min="10" max="99"></div>
+        <div class="form-group"><label class="form-label">Peso atual (kg)</label><input type="number" class="form-input" id="inp-weight" placeholder="ex: 80" min="30" max="300" step="0.1"></div>
+        <div class="form-group"><label class="form-label">Altura (cm)</label><input type="number" class="form-input" id="inp-height" placeholder="ex: 178" min="100" max="250"></div>
+      </div>
+      <div class="step" id="step-4">
+        <div class="step-label">Passo 4 de 5</div>
+        <div class="step-question">Nível de atividade física atual</div>
+        <div class="activity-grid">
+          <button class="activity-btn" onclick="selectActivity(1.2,this)"><strong>😴 Sedentário</strong><small>Pouco ou nenhum exercício</small></button>
+          <button class="activity-btn" onclick="selectActivity(1.375,this)"><strong>🚶 Levemente ativo</strong><small>Exercício 1–3x por semana</small></button>
+          <button class="activity-btn active" onclick="selectActivity(1.55,this)"><strong>🏃 Moderadamente ativo</strong><small>Exercício 3–5x por semana</small></button>
+          <button class="activity-btn" onclick="selectActivity(1.725,this)"><strong>🏋️ Muito ativo</strong><small>Exercício pesado 6–7x por semana</small></button>
+        </div>
+      </div>
+      <div class="step" id="step-5">
+        <div class="step-label">Passo 5 de 5</div>
+        <div class="step-question">Meta de peso (opcional)</div>
+        <div class="form-group"><label class="form-label">Peso alvo (kg) — deixe em branco para pular</label><input type="number" class="form-input" id="inp-goal" placeholder="ex: 70" min="30" max="300" step="0.1"></div>
+        <div style="margin-top:24px">
+          <div class="section-title">Seus números</div>
+          <div class="tmb-card">
+            <div class="tmb-card-label">TMB — Taxa Metabólica Basal</div>
+            <div class="tmb-value" id="res-tmb">—</div>
+            <div class="tmb-desc">kcal que seu corpo precisa em repouso total</div>
+          </div>
+          <div class="tmb-row">
+            <div class="tmb-mini"><div class="tmb-mini-val" id="res-tdee">—</div><div class="tmb-mini-label">TDEE (gasto total/dia)</div></div>
+            <div class="tmb-mini"><div class="tmb-mini-val" id="res-target">—</div><div class="tmb-mini-label">Meta c/ déficit 500kcal</div></div>
+          </div>
+          <p style="font-size:.78rem;color:var(--text2);line-height:1.5;background:var(--surface2);border-radius:var(--radius-sm);padding:12px;">💡 Um déficit de ~500 kcal/dia estima perda de ~0,5kg/semana — ritmo saudável e sustentável.</p>
+        </div>
+      </div>
+    </div>
+    <div class="step-nav">
+      <button class="btn-secondary" onclick="onboardBack()">← Anterior</button>
+      <button class="btn-primary" onclick="onboardNext()" id="btn-next-step" style="flex:1">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div id="screen-home" class="screen">
+    <div class="home-header">
+      <div class="profile-switcher">
+        <div class="profile-chips" id="profile-chips"></div>
+        <div class="settings-btn" onclick="showToast('⚙️ Configurações em breve!')">⚙️</div>
+      </div>
+      <div class="home-greeting" id="home-greeting">Olá! 👋</div>
+      <div class="home-date" id="home-date"></div>
+    </div>
+    <div class="home-body">
+      <div class="section-title" style="margin-top:4px">Hoje</div>
+      <div class="rings-row">
+        <div class="ring-card">
+          <div class="ring-emoji">🔥</div><div class="ring-val" id="ring-cal-in">0</div>
+          <div class="ring-label">kcal ingeridas</div>
+          <div class="ring-bar"><div class="ring-bar-fill" id="bar-cal-in"></div></div>
+        </div>
+        <div class="ring-card">
+          <div class="ring-emoji">⚡</div><div class="ring-val" id="ring-cal-out">0</div>
+          <div class="ring-label">kcal gastas</div>
+          <div class="ring-bar"><div class="ring-bar-fill" id="bar-cal-out" style="background:var(--accent2)"></div></div>
+        </div>
+        <div class="ring-card">
+          <div class="ring-emoji">💧</div><div class="ring-val" id="ring-water">0L</div>
+          <div class="ring-label">água</div>
+          <div class="ring-bar"><div class="ring-bar-fill" id="bar-water" style="background:var(--accent2)"></div></div>
+        </div>
+      </div>
+      <div class="section-title">Hábitos do dia</div>
+      <div class="habit-row">
+        <div class="habit-card"><div class="habit-icon">🔥</div><div class="habit-label">Déficit</div><div class="habit-status" id="hab-deficit">✗</div></div>
+        <div class="habit-card"><div class="habit-icon">💪</div><div class="habit-label">Treino</div><div class="habit-status" id="hab-treino">✗</div></div>
+        <div class="habit-card"><div class="habit-icon">💧</div><div class="habit-label">+3L água</div><div class="habit-status" id="hab-agua">✗</div></div>
+      </div>
+      <div class="section-title">Registros do dia</div>
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">🎙️</div>
+        <div class="empty-title">Nenhum registro ainda</div>
+        <p class="empty-desc">Toque no microfone e fale o que comeu, treinou ou bebeu!</p>
+      </div>
+      <div id="entries-list"></div>
+      <div id="add-profile-nudge" style="display:none;margin-top:8px">
+        <div class="section-title">Sua dupla</div>
+        <div class="add-profile-card" onclick="addSecondProfile()">
+          <div style="font-size:1.8rem">👤➕</div>
+          <p>Adicionar perfil da sua namorada</p>
+        </div>
+      </div>
+    </div>
+    <button class="fab" onclick="startRecording()">🎙️</button>
+    <div class="bottom-nav">
+      <button class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label al">Início</span></button>
+      <button class="nav-item" onclick="showToast('📊 Disponível no Bloco 3!')"><span class="nav-icon">📊</span><span class="nav-label">Resumo</span></button>
+      <button class="nav-item" onclick="showToast('📈 Disponível no Bloco 5!')"><span class="nav-icon">📈</span><span class="nav-label">Evolução</span></button>
+      <button class="nav-item" onclick="showToast('🏅 Disponível no Bloco 4!')"><span class="nav-icon">🏅</span><span class="nav-label">Conquistas</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- RECORDING OVERLAY -->
+<div class="record-overlay" id="record-overlay">
+  <div class="record-circle">🎙️</div>
+  <div class="record-label">Gravando...</div>
+  <div class="record-time" id="record-time">0:00</div>
+  <p class="record-hint">Fale o que comeu, treinou ou bebeu.<br>Ex: "Almocei 2 colheres de arroz e 100g de frango"<br>Ex: "Treinei 1h de musculação — costas e bíceps"<br>Ex: "Bebi 1 litro e meio de água"</p>
+  <button class="record-stop-btn" onclick="stopRecording()">⏹ Parar e analisar</button>
+</div>
+
+<!-- PROCESSING OVERLAY -->
+<div class="process-overlay" id="process-overlay">
+  <div class="process-spinner"></div>
+  <div class="process-label">Analisando com IA...</div>
+  <p class="process-sub">O Gemini está calculando calorias,<br>macros e métricas do seu registro</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GEMINI_KEY = 'AIzaSyAPk_CMeqdiF5YO4mLTVdzcUN4f19oPp7A';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY;
+
+const state = {
+  profiles: [], activeProfile: 0, currentStep: 1,
+  tempProfile: { name:'', gender:'M', age:null, weight:null, height:null, activityFactor:1.55, goalWeight:null },
+  entries: {},
+  recorder: null, audioChunks: [], recordTimer: null, recordSeconds: 0
+};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showToast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+function todayKey() { return new Date().toISOString().split('T')[0]; }
+function nowTime() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+function getEntryKey() { return todayKey() + '_' + state.profiles[state.activeProfile]?.id; }
+
+// ── ONBOARDING ──
+function startOnboarding() {
+  state.tempProfile = { name:'', gender:'M', age:null, weight:null, height:null, activityFactor:1.55, goalWeight:null };
+  const isSecond = state.profiles.length === 1;
+  document.getElementById('onboard-profile-label').textContent = isSecond ? 'dela' : 'seu';
+  document.getElementById('onboard-sub').textContent = isSecond ? 'Agora os dados dela' : 'Vamos calcular seu metabolismo basal';
+  document.getElementById('btn-m').classList.add('active');
+  document.getElementById('btn-f').classList.remove('active');
+  document.querySelectorAll('.activity-btn').forEach((b,i) => b.classList.toggle('active', i===2));
+  ['inp-name','inp-age','inp-weight','inp-height','inp-goal'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  goToStep(1);
+}
+function goToStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-'+n).classList.add('active');
+  state.currentStep = n;
+  document.getElementById('progress-fill').style.width = ((n/5)*100)+'%';
+  if (n===5) calcAndShowTMB();
+  document.getElementById('btn-next-step').textContent = n===5 ? (state.profiles.length===1?'✅ Salvar e entrar':'✅ Salvar perfil') : 'Próximo →';
+}
+function onboardNext() {
+  const s = state.currentStep;
+  if (s===1) { const v=document.getElementById('inp-name').value.trim(); if(!v){showToast('⚠️ Digite seu nome!');return;} state.tempProfile.name=v; }
+  if (s===3) {
+    const age=+document.getElementById('inp-age').value, w=+document.getElementById('inp-weight').value, h=+document.getElementById('inp-height').value;
+    if(!age||!w||!h){showToast('⚠️ Preencha todos os campos!');return;}
+    state.tempProfile.age=age; state.tempProfile.weight=w; state.tempProfile.height=h;
+  }
+  if (s===5) { saveProfile(); return; }
+  goToStep(s+1);
+}
+function onboardBack() { if(state.currentStep<=1){showScreen('screen-welcome');return;} goToStep(state.currentStep-1); }
+function selectGender(g) { state.tempProfile.gender=g; document.getElementById('btn-m').classList.toggle('active',g==='M'); document.getElementById('btn-f').classList.toggle('active',g==='F'); }
+function selectActivity(f,el) { state.tempProfile.activityFactor=f; document.querySelectorAll('.activity-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active'); }
+function calcTMB(p) { return Math.round(p.gender==='M'?(10*p.weight+6.25*p.height-5*p.age+5):(10*p.weight+6.25*p.height-5*p.age-161)); }
+function calcTDEE(p) { return Math.round(calcTMB(p)*p.activityFactor); }
+function calcAndShowTMB() {
+  const p=state.tempProfile; if(!p.age||!p.weight||!p.height) return;
+  const tmb=calcTMB(p), tdee=calcTDEE(p);
+  document.getElementById('res-tmb').textContent=tmb+' kcal';
+  document.getElementById('res-tdee').textContent=tdee+' kcal';
+  document.getElementById('res-target').textContent=(tdee-500)+' kcal';
+}
+function saveProfile() {
+  const g=+document.getElementById('inp-goal').value; state.tempProfile.goalWeight=g||null;
+  const p={...state.tempProfile}; p.tmb=calcTMB(p); p.tdee=calcTDEE(p); p.targetCal=p.tdee-500;
+  p.id=Date.now(); p.startWeight=p.weight; p.startDate=new Date().toISOString().split('T')[0];
+  state.profiles.push(p); saveToStorage();
+  if (state.profiles.length===1) {
+    state.activeProfile=0; showScreen('screen-home'); renderHome();
+    document.getElementById('add-profile-nudge').style.display='block';
+    showToast('✅ Perfil salvo! Adicione o da sua namorada 👇');
+  } else {
+    state.activeProfile=state.profiles.length-1; showScreen('screen-home'); renderHome();
+    document.getElementById('add-profile-nudge').style.display='none';
+    showToast('🎉 Tudo configurado! Vamos começar!');
+  }
+}
+function addSecondProfile() { showScreen('screen-onboarding'); startOnboarding(); }
+
+// ── HOME ──
+function renderHome() {
+  const p=state.profiles[state.activeProfile]; if(!p) return;
+  const h=new Date().getHours(), greet=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+  document.getElementById('home-greeting').textContent=greet+', '+p.name+'! 👋';
+  document.getElementById('home-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+  const chips=document.getElementById('profile-chips'); chips.innerHTML='';
+  state.profiles.forEach((pr,i)=>{ const btn=document.createElement('button'); btn.className='profile-chip'+(i===state.activeProfile?' active':''); btn.textContent=pr.name; btn.onclick=()=>{state.activeProfile=i;renderHome();}; chips.appendChild(btn); });
+  renderEntries(); updateDailyStats();
+}
+
+// ── ENTRIES ──
+function getTodayEntries() { return state.entries[getEntryKey()]||[]; }
+function renderEntries() {
+  const entries=getTodayEntries(), list=document.getElementById('entries-list'), empty=document.getElementById('empty-state');
+  list.innerHTML='';
+  if(entries.length===0){empty.style.display='block';return;}
+  empty.style.display='none';
+  [...entries].reverse().forEach((e,ri)=>{ const realIdx=entries.length-1-ri; list.appendChild(buildEntryCard(e,realIdx)); });
+}
+function buildEntryCard(entry, idx) {
+  const card=document.createElement('div'); card.className='entry-card';
+  const typeMap={meal:{label:'Refeição',cls:'badge-meal',icon:'🍽️'},workout:{label:'Treino',cls:'badge-workout',icon:'💪'},water:{label:'Água',cls:'badge-water',icon:'💧'},other:{label:'Outro',cls:'badge-other',icon:'📝'}};
+  const t=typeMap[entry.type]||typeMap.other;
+  let pills='';
+  if(entry.type==='meal'){
+    if(entry.calories) pills+=`<span class="metric-pill">🔥 <strong>${entry.calories}</strong> kcal</span>`;
+    if(entry.protein)  pills+=`<span class="metric-pill">🥩 Prot <strong>${entry.protein}g</strong></span>`;
+    if(entry.carbs)    pills+=`<span class="metric-pill">🍞 Carb <strong>${entry.carbs}g</strong></span>`;
+    if(entry.fat)      pills+=`<span class="metric-pill">🧈 Gord <strong>${entry.fat}g</strong></span>`;
+  } else if(entry.type==='workout'){
+    if(entry.calories)     pills+=`<span class="metric-pill">🔥 <strong>${entry.calories}</strong> kcal gastas</span>`;
+    if(entry.duration)     pills+=`<span class="metric-pill">⏱️ <strong>${entry.duration}</strong> min</span>`;
+    if(entry.type_workout) pills+=`<span class="metric-pill">🏋️ <strong>${entry.type_workout}</strong></span>`;
+    if(entry.intensity)    pills+=`<span class="metric-pill">📊 <strong>${entry.intensity}</strong></span>`;
+    if(entry.muscles)      pills+=`<span class="metric-pill">💪 <strong>${entry.muscles}</strong></span>`;
+  } else if(entry.type==='water'){
+    if(entry.liters) pills+=`<span class="metric-pill">💧 <strong>${entry.liters}L</strong> de água</span>`;
+  } else if(entry.note){
+    pills+=`<span class="metric-pill">${entry.note}</span>`;
+  }
+  card.innerHTML=`<div class="entry-card-header"><span style="font-size:1.2rem">${t.icon}</span><span class="entry-type-badge ${t.cls}">${t.label}</span><span class="entry-time">${entry.time}</span></div><div class="entry-transcript">"${entry.transcript}"</div><div class="entry-metrics">${pills}</div><button class="entry-delete" onclick="deleteEntry(${idx})">✕</button>`;
+  return card;
+}
+function deleteEntry(idx) {
+  const key=getEntryKey(); if(!state.entries[key]) return;
+  state.entries[key].splice(idx,1); saveToStorage(); renderEntries(); updateDailyStats();
+  showToast('🗑️ Registro removido');
+}
+
+// ── DAILY STATS ──
+function updateDailyStats() {
+  const p=state.profiles[state.activeProfile]; if(!p) return;
+  const entries=getTodayEntries();
+  let calIn=0, calOut=0, water=0, hasTreino=false;
+  entries.forEach(e=>{ if(e.type==='meal'){calIn+=(e.calories||0);} if(e.type==='workout'){calOut+=(e.calories||0);hasTreino=true;} if(e.type==='water'){water+=(e.liters||0);} });
+  document.getElementById('ring-cal-in').textContent=calIn;
+  document.getElementById('ring-cal-out').textContent=calOut;
+  document.getElementById('ring-water').textContent=water.toFixed(1)+'L';
+  const tgt=p.targetCal||2000;
+  document.getElementById('bar-cal-in').style.width=Math.min(100,(calIn/tgt)*100)+'%';
+  document.getElementById('bar-cal-out').style.width=Math.min(100,(calOut/600)*100)+'%';
+  document.getElementById('bar-water').style.width=Math.min(100,(water/3)*100)+'%';
+  const deficit=(p.tdee+calOut)-calIn;
+  const dEl=document.getElementById('hab-deficit'), tEl=document.getElementById('hab-treino'), aEl=document.getElementById('hab-agua');
+  dEl.classList.toggle('done',deficit>=200); dEl.textContent=deficit>=200?'✓':'✗';
+  tEl.classList.toggle('done',hasTreino); tEl.textContent=hasTreino?'✓':'✗';
+  aEl.classList.toggle('done',water>=3); aEl.textContent=water>=3?'✓':'✗';
+}
+
+// ── AUDIO RECORDING ──
+async function startRecording() {
+  try {
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    state.audioChunks=[];
+    const opts=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?{mimeType:'audio/webm;codecs=opus'}:MediaRecorder.isTypeSupported('audio/mp4')?{mimeType:'audio/mp4'}:{};
+    state.recorder=new MediaRecorder(stream,opts);
+    state.recorder.ondataavailable=e=>{if(e.data.size>0)state.audioChunks.push(e.data);};
+    state.recorder.onstop=()=>{stream.getTracks().forEach(t=>t.stop());processAudio();};
+    state.recorder.start(100);
+    document.getElementById('record-overlay').classList.add('active');
+    state.recordSeconds=0; document.getElementById('record-time').textContent='0:00';
+    state.recordTimer=setInterval(()=>{
+      state.recordSeconds++;
+      const m=Math.floor(state.recordSeconds/60), s=state.recordSeconds%60;
+      document.getElementById('record-time').textContent=m+':'+String(s).padStart(2,'0');
+      if(state.recordSeconds>=120) stopRecording();
+    },1000);
+  } catch(err) { showToast('❌ Permita o acesso ao microfone nas configurações!',3500); }
+}
+function stopRecording() {
+  clearInterval(state.recordTimer);
+  document.getElementById('record-overlay').classList.remove('active');
+  if(state.recorder&&state.recorder.state!=='inactive') state.recorder.stop();
+}
+
+// ── GEMINI ──
+async function processAudio() {
+  document.getElementById('process-overlay').classList.add('active');
+  try {
+    const blob=new Blob(state.audioChunks,{type:state.recorder?.mimeType||'audio/webm'});
+    const base64=await blobToBase64(blob);
+    const mimeType=blob.type||'audio/webm';
+    const p=state.profiles[state.activeProfile];
+    const prompt=`Você é um assistente nutricional e de fitness. Analise este áudio em português e extraia as informações do registro.
+
+Contexto: ${p.gender==='M'?'Homem':'Mulher'}, ${p.age} anos, ${p.weight}kg, ${p.height}cm.
+
+Retorne APENAS JSON válido, sem markdown, sem texto extra. Use esta estrutura:
+
+REFEIÇÃO: {"type":"meal","transcript":"o que foi dito","calories":NUM,"protein":NUM,"carbs":NUM,"fat":NUM,"meal_name":"nome"}
+TREINO: {"type":"workout","transcript":"o que foi dito","calories":NUM,"duration":NUM,"type_workout":"Musculação/Corrida/etc","intensity":"Leve/Moderado/Intenso","muscles":"grupos musculares"}
+ÁGUA: {"type":"water","transcript":"o que foi dito","liters":NUM}
+OUTRO: {"type":"other","transcript":"o que foi dito","note":"resumo"}
+
+Regras: valores numéricos sem unidade. Para treino, calories = kcal GASTAS estimadas. Valores desconhecidos = null. Responda SOMENTE o JSON.`;
+
+    const res=await fetch(GEMINI_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      contents:[{parts:[{text:prompt},{inline_data:{mime_type:mimeType,data:base64}}]}],
+      generationConfig:{temperature:0.1,maxOutputTokens:512}
+    })});
+    if(!res.ok) throw new Error(await res.text());
+    const data=await res.json();
+    const raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    const entry=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    entry.time=nowTime(); entry.id=Date.now();
+    const key=getEntryKey();
+    if(!state.entries[key]) state.entries[key]=[];
+    state.entries[key].push(entry);
+    saveToStorage(); renderEntries(); updateDailyStats();
+    document.getElementById('process-overlay').classList.remove('active');
+    const emoji={meal:'🍽️',workout:'💪',water:'💧',other:'📝'};
+    showToast((emoji[entry.type]||'✅')+' Registro salvo!');
+  } catch(err) {
+    document.getElementById('process-overlay').classList.remove('active');
+    console.error(err); showToast('❌ Erro ao processar. Tente novamente.',3000);
+  }
+}
+function blobToBase64(blob) {
+  return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result.split(',')[1]); r.onerror=rej; r.readAsDataURL(blob); });
+}
+
+// ── STORAGE ──
+function saveToStorage() {
+  try { localStorage.setItem('slimduo_v1',JSON.stringify(state.profiles)); localStorage.setItem('slimduo_entries',JSON.stringify(state.entries)); } catch(e){}
+}
+function loadFromStorage() {
+  try {
+    const p=localStorage.getItem('slimduo_v1'), e=localStorage.getItem('slimduo_entries');
+    if(p) state.profiles=JSON.parse(p); if(e) state.entries=JSON.parse(e);
+    if(state.profiles.length>0){showScreen('screen-home');renderHome();return true;}
+  } catch(e){}
+  return false;
+}
+
+(function init(){ if(!loadFromStorage()) showScreen('screen-welcome'); })();
+</script>
+</body>
+</html>
