@@ -139,22 +139,22 @@
   .nav-label.al { color: var(--accent); }
 
   /* FAB */
-  .fab { position: fixed; bottom: 84px; right: 24px; width: 62px; height: 62px; border-radius: 50%; background: var(--accent); border: none; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; cursor: pointer; box-shadow: 0 8px 32px rgba(200,245,100,.4); z-index: 25; transition: all .2s; animation: fabGlow 3s ease-in-out infinite; }
+  .fab { position: fixed; bottom: 84px; right: 24px; width: 62px; height: 62px; border-radius: 50%; background: var(--accent); border: none; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; cursor: pointer; box-shadow: 0 8px 32px rgba(200,245,100,.4); z-index: 25; transition: all .2s; animation: fabGlow 3s ease-in-out infinite; -webkit-tap-highlight-color: transparent; }
   @keyframes fabGlow { 0%,100%{box-shadow:0 8px 32px rgba(200,245,100,.4)} 50%{box-shadow:0 8px 48px rgba(200,245,100,.65)} }
   .fab:active { transform: scale(.92); }
 
   /* RECORDING OVERLAY */
-  .record-overlay { position: fixed; inset: 0; background: rgba(14,15,17,.93); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 40px; backdrop-filter: blur(12px); }
+  .record-overlay { position: fixed; inset: 0; background: rgba(14,15,17,.93); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 40px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
   .record-overlay.active { display: flex; animation: fadeIn .2s ease; }
   .record-circle { width: 120px; height: 120px; border-radius: 50%; background: var(--accent3); display: flex; align-items: center; justify-content: center; font-size: 3rem; animation: ripple 1.2s ease-in-out infinite; }
   @keyframes ripple { 0%{box-shadow:0 0 0 0 rgba(245,100,160,.4)} 70%{box-shadow:0 0 0 30px rgba(245,100,160,0)} 100%{box-shadow:0 0 0 0 rgba(245,100,160,0)} }
   .record-label { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.3rem; }
   .record-time { font-size: 2rem; font-family: 'Syne', sans-serif; font-weight: 800; color: var(--accent3); letter-spacing: -1px; }
   .record-hint { font-size: .82rem; color: var(--text2); text-align: center; line-height: 1.6; max-width: 280px; }
-  .record-stop-btn { padding: 14px 32px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 999px; color: var(--text); font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; font-size: .9rem; }
+  .record-stop-btn { padding: 14px 32px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 999px; color: var(--text); font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; font-size: .9rem; -webkit-tap-highlight-color: transparent; }
 
   /* PROCESSING OVERLAY */
-  .process-overlay { position: fixed; inset: 0; background: rgba(14,15,17,.93); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 40px; backdrop-filter: blur(12px); }
+  .process-overlay { position: fixed; inset: 0; background: rgba(14,15,17,.93); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 40px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
   .process-overlay.active { display: flex; animation: fadeIn .2s ease; }
   .process-spinner { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--border); border-top-color: var(--accent); animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -164,6 +164,40 @@
   /* TOAST */
   .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 10px 20px; font-size: .85rem; color: var(--text); z-index: 100; transition: transform .35s cubic-bezier(.34,1.56,.64,1); white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,.4); pointer-events: none; }
   .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* SETTINGS SCREEN */
+  #screen-settings { padding: 0; }
+  .settings-header { padding: 52px 24px 20px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; gap: 12px; }
+  .settings-back { background: none; border: none; color: var(--text2); font-size: 1.2rem; cursor: pointer; padding: 4px; }
+  .settings-header-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.3rem; letter-spacing: -.5px; }
+  .settings-body { padding: 24px 24px 60px; flex: 1; overflow-y: auto; }
+  .settings-section { margin-bottom: 32px; }
+  .settings-section-title { font-size: .7rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+  .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 12px; }
+  .settings-card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
+  .settings-card-desc { font-size: .82rem; color: var(--text2); line-height: 1.5; margin-bottom: 16px; }
+  .settings-card-desc a { color: var(--accent2); text-decoration: none; }
+  .api-key-wrap { position: relative; }
+  .api-key-input { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px 48px 14px 16px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: .85rem; -webkit-appearance: none; transition: border-color .2s; letter-spacing: .5px; }
+  .api-key-input:focus { outline: none; border-color: var(--accent); }
+  .api-key-input::placeholder { color: var(--text3); letter-spacing: 0; }
+  .api-key-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text3); cursor: pointer; font-size: 1rem; padding: 4px; }
+  .api-key-status { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: .78rem; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+  .status-dot.ok { background: var(--accent); }
+  .status-dot.err { background: var(--accent3); }
+  .btn-save-key { margin-top: 14px; width: 100%; padding: 14px; background: var(--accent); color: #0e0f11; border: none; border-radius: 999px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem; cursor: pointer; }
+  .profile-settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+  .profile-settings-info { display: flex; flex-direction: column; gap: 2px; }
+  .profile-settings-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; }
+  .profile-settings-meta { font-size: .78rem; color: var(--text2); }
+  .btn-add-profile { width: 100%; padding: 14px; background: transparent; border: 1.5px dashed var(--border); border-radius: var(--radius); color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: .9rem; cursor: pointer; margin-top: 4px; }
+
+  /* NO-KEY BANNER */
+  .no-key-banner { background: rgba(245,100,160,.08); border: 1px solid rgba(245,100,160,.25); border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 16px; display: none; }
+  .no-key-banner p { font-size: .82rem; color: var(--accent3); line-height: 1.5; }
+  .no-key-banner button { background: none; border: none; color: var(--accent3); font-family: 'DM Sans', sans-serif; font-size: .82rem; text-decoration: underline; cursor: pointer; padding: 0; margin-top: 4px; }
+
   ::-webkit-scrollbar { display: none; }
 </style>
 </head>
@@ -259,12 +293,17 @@
     <div class="home-header">
       <div class="profile-switcher">
         <div class="profile-chips" id="profile-chips"></div>
-        <div class="settings-btn" onclick="showToast('⚙️ Configurações em breve!')">⚙️</div>
+        <div class="settings-btn" onclick="openSettings()">⚙️</div>
       </div>
       <div class="home-greeting" id="home-greeting">Olá! 👋</div>
       <div class="home-date" id="home-date"></div>
     </div>
     <div class="home-body">
+      <!-- Banner: chave não configurada -->
+      <div class="no-key-banner" id="no-key-banner">
+        <p>⚠️ <strong>Chave Gemini não configurada.</strong> O microfone não vai funcionar até você inserir sua API key.</p>
+        <button onclick="openSettings()">Configurar agora →</button>
+      </div>
       <div class="section-title" style="margin-top:4px">Hoje</div>
       <div class="rings-row">
         <div class="ring-card">
@@ -304,7 +343,7 @@
         </div>
       </div>
     </div>
-    <button class="fab" onclick="startRecording()">🎙️</button>
+    <button class="fab" id="fab-btn">🎙️</button>
     <div class="bottom-nav">
       <button class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label al">Início</span></button>
       <button class="nav-item" onclick="showToast('📊 Disponível no Bloco 3!')"><span class="nav-icon">📊</span><span class="nav-label">Resumo</span></button>
@@ -312,6 +351,44 @@
       <button class="nav-item" onclick="showToast('🏅 Disponível no Bloco 4!')"><span class="nav-icon">🏅</span><span class="nav-label">Conquistas</span></button>
     </div>
   </div>
+
+  <!-- SETTINGS -->
+  <div id="screen-settings" class="screen">
+    <div class="settings-header">
+      <button class="settings-back" onclick="showScreen('screen-home'); renderHome()">←</button>
+      <div class="settings-header-title">⚙️ Configurações</div>
+    </div>
+    <div class="settings-body">
+
+      <div class="settings-section">
+        <div class="settings-section-title">🔑 Chave da API Gemini</div>
+        <div class="settings-card">
+          <div class="settings-card-title">Google Gemini API Key</div>
+          <div class="settings-card-desc">
+            Sua chave fica salva <strong>só no seu celular</strong> (localStorage) — nunca vai para a internet ou para o código.<br><br>
+            Não tem uma chave? <a href="https://aistudio.google.com/app/apikey" target="_blank">Crie grátis em aistudio.google.com →</a>
+          </div>
+          <div class="api-key-wrap">
+            <input type="password" class="api-key-input" id="api-key-input" placeholder="Cole sua chave aqui: AIzaSy...">
+            <button class="api-key-toggle" id="api-key-toggle" onclick="toggleKeyVisibility()">👁</button>
+          </div>
+          <div class="api-key-status" id="api-key-status">
+            <div class="status-dot" id="status-dot"></div>
+            <span id="status-text">Nenhuma chave salva</span>
+          </div>
+          <button class="btn-save-key" onclick="saveApiKey()">💾 Salvar chave</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">👤 Perfis</div>
+        <div id="profiles-settings-list"></div>
+        <button class="btn-add-profile" onclick="addSecondProfile()">➕ Adicionar perfil</button>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 <!-- RECORDING OVERLAY -->
@@ -320,7 +397,7 @@
   <div class="record-label">Gravando...</div>
   <div class="record-time" id="record-time">0:00</div>
   <p class="record-hint">Fale o que comeu, treinou ou bebeu.<br>Ex: "Almocei 2 colheres de arroz e 100g de frango"<br>Ex: "Treinei 1h de musculação — costas e bíceps"<br>Ex: "Bebi 1 litro e meio de água"</p>
-  <button class="record-stop-btn" onclick="stopRecording()">⏹ Parar e analisar</button>
+  <button class="record-stop-btn" id="record-stop-btn">⏹ Parar e analisar</button>
 </div>
 
 <!-- PROCESSING OVERLAY -->
@@ -333,14 +410,21 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const GEMINI_KEY = 'AIzaSyAPk_CMeqdiF5YO4mLTVdzcUN4f19oPp7A';
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY;
+// ── API KEY — lida do localStorage, nunca hardcoded ──
+function getGeminiKey() {
+  return localStorage.getItem('slimduo_gemini_key') || '';
+}
+function getGeminiUrl() {
+  const k = getGeminiKey();
+  return 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + k;
+}
 
 const state = {
   profiles: [], activeProfile: 0, currentStep: 1,
   tempProfile: { name:'', gender:'M', age:null, weight:null, height:null, activityFactor:1.55, goalWeight:null },
   entries: {},
-  recorder: null, audioChunks: [], recordTimer: null, recordSeconds: 0
+  recorder: null, audioChunks: [], recordTimer: null, recordSeconds: 0,
+  audioStream: null
 };
 
 function showScreen(id) {
@@ -355,6 +439,59 @@ function showToast(msg, dur=2500) {
 function todayKey() { return new Date().toISOString().split('T')[0]; }
 function nowTime() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
 function getEntryKey() { return todayKey() + '_' + state.profiles[state.activeProfile]?.id; }
+
+// ── SETTINGS ──
+function openSettings() {
+  renderProfilesSettings();
+  renderKeyStatus();
+  const saved = getGeminiKey();
+  const inp = document.getElementById('api-key-input');
+  inp.value = saved ? saved : '';
+  showScreen('screen-settings');
+}
+function toggleKeyVisibility() {
+  const inp = document.getElementById('api-key-input');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val) { showToast('⚠️ Cole sua chave antes de salvar!'); return; }
+  if (!val.startsWith('AIza')) { showToast('⚠️ Chave inválida — deve começar com AIza'); return; }
+  localStorage.setItem('slimduo_gemini_key', val);
+  renderKeyStatus();
+  updateNoKeyBanner();
+  showToast('✅ Chave salva com segurança!');
+}
+function renderKeyStatus() {
+  const k = getGeminiKey();
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+  if (k) {
+    dot.className = 'status-dot ok';
+    txt.textContent = 'Chave configurada (' + k.slice(0,8) + '...)';
+  } else {
+    dot.className = 'status-dot err';
+    txt.textContent = 'Nenhuma chave salva';
+  }
+}
+function renderProfilesSettings() {
+  const list = document.getElementById('profiles-settings-list');
+  list.innerHTML = '';
+  state.profiles.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'profile-settings-card';
+    card.innerHTML = `
+      <div class="profile-settings-info">
+        <div class="profile-settings-name">${p.name}</div>
+        <div class="profile-settings-meta">${p.gender==='M'?'Homem':'Mulher'} · ${p.age} anos · ${p.weight}kg · TMB ${p.tmb} kcal</div>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+function updateNoKeyBanner() {
+  const banner = document.getElementById('no-key-banner');
+  if (banner) banner.style.display = getGeminiKey() ? 'none' : 'block';
+}
 
 // ── ONBOARDING ──
 function startOnboarding() {
@@ -424,6 +561,7 @@ function renderHome() {
   document.getElementById('home-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   const chips=document.getElementById('profile-chips'); chips.innerHTML='';
   state.profiles.forEach((pr,i)=>{ const btn=document.createElement('button'); btn.className='profile-chip'+(i===state.activeProfile?' active':''); btn.textContent=pr.name; btn.onclick=()=>{state.activeProfile=i;renderHome();}; chips.appendChild(btn); });
+  updateNoKeyBanner();
   renderEntries(); updateDailyStats();
 }
 
@@ -486,41 +624,160 @@ function updateDailyStats() {
   aEl.classList.toggle('done',water>=3); aEl.textContent=water>=3?'✓':'✗';
 }
 
-// ── AUDIO RECORDING ──
-async function startRecording() {
-  try {
-    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    state.audioChunks=[];
-    const opts=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?{mimeType:'audio/webm;codecs=opus'}:MediaRecorder.isTypeSupported('audio/mp4')?{mimeType:'audio/mp4'}:{};
-    state.recorder=new MediaRecorder(stream,opts);
-    state.recorder.ondataavailable=e=>{if(e.data.size>0)state.audioChunks.push(e.data);};
-    state.recorder.onstop=()=>{stream.getTracks().forEach(t=>t.stop());processAudio();};
-    state.recorder.start(100);
-    document.getElementById('record-overlay').classList.add('active');
-    state.recordSeconds=0; document.getElementById('record-time').textContent='0:00';
-    state.recordTimer=setInterval(()=>{
-      state.recordSeconds++;
-      const m=Math.floor(state.recordSeconds/60), s=state.recordSeconds%60;
-      document.getElementById('record-time').textContent=m+':'+String(s).padStart(2,'0');
-      if(state.recordSeconds>=120) stopRecording();
-    },1000);
-  } catch(err) { showToast('❌ Permita o acesso ao microfone nas configurações!',3500); }
+// ── AUDIO RECORDING — compatível com Safari/iOS ──
+// O Safari exige que getUserMedia seja chamado DIRETAMENTE dentro do handler de toque.
+// Não pode haver await antes de getUserMedia dentro do mesmo handler.
+// Solução: o botão FAB chama startRecording() sincronamente via touchend/click.
+
+function initFab() {
+  const fab = document.getElementById('fab-btn');
+  const stopBtn = document.getElementById('record-stop-btn');
+
+  // Usa touchend no iOS para garantir que é um gesto do usuário
+  fab.addEventListener('touchend', function(e) {
+    e.preventDefault();
+    startRecording();
+  }, { passive: false });
+
+  // Fallback para desktop (click normal)
+  fab.addEventListener('click', function(e) {
+    // Evita duplo disparo no mobile (touchend já foi tratado)
+    if (e.detail === 0) return; // touchend simula click com detail=0 em alguns browsers
+    startRecording();
+  });
+
+  stopBtn.addEventListener('touchend', function(e) {
+    e.preventDefault();
+    stopRecording();
+  }, { passive: false });
+
+  stopBtn.addEventListener('click', function(e) {
+    if (e.detail === 0) return;
+    stopRecording();
+  });
 }
+
+async function startRecording() {
+  if (!getGeminiKey()) {
+    showToast('⚠️ Configure a API Key em Configurações primeiro!', 3500);
+    return;
+  }
+
+  // Limpa estado anterior
+  state.audioChunks = [];
+  state.recorder = null;
+
+  try {
+    // getUserMedia precisa ser chamado aqui, direto no handler de toque
+    const constraints = {
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        sampleRate: 44100
+      }
+    };
+
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    state.audioStream = stream;
+
+    // Detecta o melhor formato suportado (Safari usa audio/mp4)
+    let mimeType = '';
+    const types = [
+      'audio/mp4',
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/ogg;codecs=opus',
+      ''
+    ];
+    for (const t of types) {
+      if (t === '' || MediaRecorder.isTypeSupported(t)) {
+        mimeType = t;
+        break;
+      }
+    }
+
+    const opts = mimeType ? { mimeType } : {};
+    state.recorder = new MediaRecorder(stream, opts);
+
+    state.recorder.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) state.audioChunks.push(e.data);
+    };
+
+    state.recorder.onstop = () => {
+      // Para todas as tracks do stream
+      stream.getTracks().forEach(t => t.stop());
+      processAudio();
+    };
+
+    state.recorder.onerror = (e) => {
+      console.error('MediaRecorder error:', e);
+      showToast('❌ Erro na gravação. Tente novamente.', 3000);
+      stopRecording();
+    };
+
+    // Coleta dados a cada 500ms (mais compatível com Safari)
+    state.recorder.start(500);
+
+    // Mostra overlay
+    document.getElementById('record-overlay').classList.add('active');
+    state.recordSeconds = 0;
+    document.getElementById('record-time').textContent = '0:00';
+
+    state.recordTimer = setInterval(() => {
+      state.recordSeconds++;
+      const m = Math.floor(state.recordSeconds / 60);
+      const s = state.recordSeconds % 60;
+      document.getElementById('record-time').textContent = m + ':' + String(s).padStart(2, '0');
+      if (state.recordSeconds >= 120) stopRecording();
+    }, 1000);
+
+  } catch (err) {
+    console.error('Mic error:', err);
+    let msg = '❌ Permita o acesso ao microfone nas configurações!';
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      msg = '❌ Acesso ao microfone negado. Vá em Ajustes > Safari > Microfone.';
+    } else if (err.name === 'NotFoundError') {
+      msg = '❌ Nenhum microfone encontrado no dispositivo.';
+    }
+    showToast(msg, 4000);
+  }
+}
+
 function stopRecording() {
   clearInterval(state.recordTimer);
   document.getElementById('record-overlay').classList.remove('active');
-  if(state.recorder&&state.recorder.state!=='inactive') state.recorder.stop();
+  if (state.recorder && state.recorder.state !== 'inactive') {
+    state.recorder.stop();
+  } else {
+    // Se o recorder nem chegou a iniciar, para o stream se existir
+    if (state.audioStream) {
+      state.audioStream.getTracks().forEach(t => t.stop());
+      state.audioStream = null;
+    }
+  }
 }
 
 // ── GEMINI ──
 async function processAudio() {
+  if (state.audioChunks.length === 0) {
+    showToast('❌ Nenhum áudio capturado. Tente novamente.', 3000);
+    return;
+  }
+
   document.getElementById('process-overlay').classList.add('active');
   try {
-    const blob=new Blob(state.audioChunks,{type:state.recorder?.mimeType||'audio/webm'});
-    const base64=await blobToBase64(blob);
-    const mimeType=blob.type||'audio/webm';
-    const p=state.profiles[state.activeProfile];
-    const prompt=`Você é um assistente nutricional e de fitness. Analise este áudio em português e extraia as informações do registro.
+    const mimeType = state.recorder?.mimeType || 'audio/mp4';
+    const blob = new Blob(state.audioChunks, { type: mimeType });
+
+    // Verifica tamanho mínimo
+    if (blob.size < 1000) {
+      throw new Error('Áudio muito curto');
+    }
+
+    const base64 = await blobToBase64(blob);
+    const p = state.profiles[state.activeProfile];
+
+    const prompt = `Você é um assistente nutricional e de fitness. Analise este áudio em português e extraia as informações do registro.
 
 Contexto: ${p.gender==='M'?'Homem':'Mulher'}, ${p.age} anos, ${p.weight}kg, ${p.height}cm.
 
@@ -533,45 +790,83 @@ OUTRO: {"type":"other","transcript":"o que foi dito","note":"resumo"}
 
 Regras: valores numéricos sem unidade. Para treino, calories = kcal GASTAS estimadas. Valores desconhecidos = null. Responda SOMENTE o JSON.`;
 
-    const res=await fetch(GEMINI_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      contents:[{parts:[{text:prompt},{inline_data:{mime_type:mimeType,data:base64}}]}],
-      generationConfig:{temperature:0.1,maxOutputTokens:512}
-    })});
-    if(!res.ok) throw new Error(await res.text());
-    const data=await res.json();
-    const raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-    const entry=JSON.parse(raw.replace(/```json|```/g,'').trim());
-    entry.time=nowTime(); entry.id=Date.now();
-    const key=getEntryKey();
-    if(!state.entries[key]) state.entries[key]=[];
+    const res = await fetch(getGeminiUrl(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mimeType, data: base64 } }] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 512 }
+      })
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      if (res.status === 400 && errText.includes('API_KEY')) {
+        throw new Error('API_KEY_INVALID');
+      }
+      throw new Error(errText);
+    }
+
+    const data = await res.json();
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const entry = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    entry.time = nowTime(); entry.id = Date.now();
+    const key = getEntryKey();
+    if (!state.entries[key]) state.entries[key] = [];
     state.entries[key].push(entry);
     saveToStorage(); renderEntries(); updateDailyStats();
     document.getElementById('process-overlay').classList.remove('active');
-    const emoji={meal:'🍽️',workout:'💪',water:'💧',other:'📝'};
-    showToast((emoji[entry.type]||'✅')+' Registro salvo!');
-  } catch(err) {
+    const emoji = { meal:'🍽️', workout:'💪', water:'💧', other:'📝' };
+    showToast((emoji[entry.type] || '✅') + ' Registro salvo!');
+  } catch (err) {
     document.getElementById('process-overlay').classList.remove('active');
-    console.error(err); showToast('❌ Erro ao processar. Tente novamente.',3000);
+    console.error(err);
+    if (err.message === 'API_KEY_INVALID') {
+      showToast('❌ Chave API inválida. Verifique em Configurações.', 4000);
+    } else if (err.message === 'Áudio muito curto') {
+      showToast('❌ Áudio muito curto. Fale por pelo menos 2 segundos.', 3000);
+    } else {
+      showToast('❌ Erro ao processar. Tente novamente.', 3000);
+    }
   }
 }
+
 function blobToBase64(blob) {
-  return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result.split(',')[1]); r.onerror=rej; r.readAsDataURL(blob); });
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
 }
 
 // ── STORAGE ──
 function saveToStorage() {
-  try { localStorage.setItem('slimduo_v1',JSON.stringify(state.profiles)); localStorage.setItem('slimduo_entries',JSON.stringify(state.entries)); } catch(e){}
+  try {
+    localStorage.setItem('slimduo_v1', JSON.stringify(state.profiles));
+    localStorage.setItem('slimduo_entries', JSON.stringify(state.entries));
+  } catch(e) {}
 }
 function loadFromStorage() {
   try {
-    const p=localStorage.getItem('slimduo_v1'), e=localStorage.getItem('slimduo_entries');
-    if(p) state.profiles=JSON.parse(p); if(e) state.entries=JSON.parse(e);
-    if(state.profiles.length>0){showScreen('screen-home');renderHome();return true;}
-  } catch(e){}
+    const p = localStorage.getItem('slimduo_v1');
+    const e = localStorage.getItem('slimduo_entries');
+    if (p) state.profiles = JSON.parse(p);
+    if (e) state.entries = JSON.parse(e);
+    if (state.profiles.length > 0) {
+      showScreen('screen-home');
+      renderHome();
+      return true;
+    }
+  } catch(e) {}
   return false;
 }
 
-(function init(){ if(!loadFromStorage()) showScreen('screen-welcome'); })();
+// ── INIT ──
+(function init() {
+  initFab();
+  if (!loadFromStorage()) showScreen('screen-welcome');
+})();
 </script>
 </body>
 </html>
