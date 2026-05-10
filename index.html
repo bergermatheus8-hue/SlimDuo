@@ -193,6 +193,15 @@
   .profile-settings-meta { font-size: .78rem; color: var(--text2); }
   .btn-add-profile { width: 100%; padding: 14px; background: transparent; border: 1.5px dashed var(--border); border-radius: var(--radius); color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: .9rem; cursor: pointer; margin-top: 4px; }
 
+  /* DEBUG LOG */
+  .debug-overlay { position: fixed; inset: 0; background: rgba(14,15,17,.97); z-index: 200; display: none; flex-direction: column; padding: 52px 20px 20px; }
+  .debug-overlay.active { display: flex; }
+  .debug-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; color: var(--accent3); }
+  .debug-log { flex: 1; overflow-y: auto; background: #000; border-radius: var(--radius-sm); padding: 14px; font-family: monospace; font-size: .75rem; line-height: 1.6; color: #0f0; white-space: pre-wrap; word-break: break-all; }
+  .debug-close { margin-top: 12px; padding: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); font-family: 'DM Sans', sans-serif; cursor: pointer; }
+  .btn-test-key { margin-top: 10px; width: 100%; padding: 14px; background: transparent; border: 1.5px solid var(--accent2); border-radius: 999px; color: var(--accent2); font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem; cursor: pointer; }
+  .btn-debug { margin-top: 8px; width: 100%; padding: 12px; background: transparent; border: 1.5px solid var(--border); border-radius: 999px; color: var(--text3); font-family: 'DM Sans', sans-serif; font-size: .85rem; cursor: pointer; }
+
   /* NO-KEY BANNER */
   .no-key-banner { background: rgba(245,100,160,.08); border: 1px solid rgba(245,100,160,.25); border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 16px; display: none; }
   .no-key-banner p { font-size: .82rem; color: var(--accent3); line-height: 1.5; }
@@ -377,6 +386,8 @@
             <span id="status-text">Nenhuma chave salva</span>
           </div>
           <button class="btn-save-key" onclick="saveApiKey()">💾 Salvar chave</button>
+          <button class="btn-test-key" onclick="testApiKey()">🧪 Testar chave agora</button>
+          <button class="btn-debug" onclick="openDebugLog()">🐛 Ver log de erros</button>
         </div>
       </div>
 
@@ -409,8 +420,58 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- DEBUG LOG OVERLAY -->
+<div class="debug-overlay" id="debug-overlay">
+  <div class="debug-title">🐛 Log de Diagnóstico</div>
+  <div class="debug-log" id="debug-log">Nenhum log ainda. Tente gravar um áudio e volte aqui.</div>
+  <button class="debug-close" onclick="document.getElementById('debug-overlay').classList.remove('active')">← Fechar</button>
+</div>
+
 <script>
 // ── API KEY — lida do localStorage, nunca hardcoded ──
+// ── DEBUG LOG ──
+const debugLines = [];
+function dlog(msg) {
+  const ts = new Date().toLocaleTimeString('pt-BR');
+  const line = '[' + ts + '] ' + msg;
+  debugLines.push(line);
+  if (debugLines.length > 100) debugLines.shift();
+  const el = document.getElementById('debug-log');
+  if (el) el.textContent = debugLines.join('\n');
+  console.log(line);
+}
+function openDebugLog() {
+  document.getElementById('debug-overlay').classList.add('active');
+}
+
+async function testApiKey() {
+  const k = getGeminiKey();
+  if (!k) { showToast('⚠️ Salve uma chave primeiro!'); return; }
+  showToast('🧪 Testando chave...', 4000);
+  dlog('Testando chave: ' + k.slice(0,12) + '...');
+  try {
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + k;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: 'Responda apenas: OK' }] }],
+        generationConfig: { maxOutputTokens: 10 }
+      })
+    });
+    const txt = await res.text();
+    dlog('Status: ' + res.status);
+    dlog('Resposta: ' + txt.slice(0, 200));
+    if (res.ok) {
+      showToast('✅ Chave funcionando perfeitamente!', 3000);
+    } else {
+      showToast('❌ Chave inválida ou sem permissão. Veja o log.', 4000);
+    }
+  } catch(e) {
+    dlog('ERRO no teste: ' + e.message);
+    showToast('❌ Erro de conexão: ' + e.message, 4000);
+  }
+}
 function getGeminiKey() {
   return localStorage.getItem('slimduo_gemini_key') || '';
 }
@@ -668,6 +729,7 @@ async function startRecording() {
   state.recorder = null;
 
   try {
+    dlog('Iniciando gravação...');
     // getUserMedia precisa ser chamado aqui, direto no handler de toque
     const constraints = {
       audio: {
@@ -679,6 +741,7 @@ async function startRecording() {
 
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     state.audioStream = stream;
+    dlog('Stream obtido. Tracks: ' + stream.getTracks().length);
 
     // Detecta o melhor formato suportado (Safari usa audio/mp4)
     let mimeType = '';
@@ -697,20 +760,25 @@ async function startRecording() {
     }
 
     const opts = mimeType ? { mimeType } : {};
+    dlog('MimeType selecionado: "' + mimeType + '"');
     state.recorder = new MediaRecorder(stream, opts);
 
     state.recorder.ondataavailable = (e) => {
-      if (e.data && e.data.size > 0) state.audioChunks.push(e.data);
+      if (e.data && e.data.size > 0) {
+        state.audioChunks.push(e.data);
+        dlog('Chunk recebido: ' + e.data.size + ' bytes');
+      }
     };
 
     state.recorder.onstop = () => {
+      dlog('Gravação encerrada. Total chunks: ' + state.audioChunks.length);
       // Para todas as tracks do stream
       stream.getTracks().forEach(t => t.stop());
       processAudio();
     };
 
     state.recorder.onerror = (e) => {
-      console.error('MediaRecorder error:', e);
+      dlog('ERRO MediaRecorder: ' + JSON.stringify(e.error));
       showToast('❌ Erro na gravação. Tente novamente.', 3000);
       stopRecording();
     };
@@ -732,7 +800,7 @@ async function startRecording() {
     }, 1000);
 
   } catch (err) {
-    console.error('Mic error:', err);
+    dlog('ERRO ao iniciar gravação: ' + err.name + ' — ' + err.message);
     let msg = '❌ Permita o acesso ao microfone nas configurações!';
     if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
       msg = '❌ Acesso ao microfone negado. Vá em Ajustes > Safari > Microfone.';
@@ -760,6 +828,7 @@ function stopRecording() {
 // ── GEMINI ──
 async function processAudio() {
   if (state.audioChunks.length === 0) {
+    dlog('ERRO: Nenhum chunk de áudio capturado');
     showToast('❌ Nenhum áudio capturado. Tente novamente.', 3000);
     return;
   }
@@ -768,6 +837,7 @@ async function processAudio() {
   try {
     const mimeType = state.recorder?.mimeType || 'audio/mp4';
     const blob = new Blob(state.audioChunks, { type: mimeType });
+    dlog('Blob criado: ' + blob.size + ' bytes, tipo: ' + blob.type);
 
     // Verifica tamanho mínimo
     if (blob.size < 1000) {
@@ -775,7 +845,9 @@ async function processAudio() {
     }
 
     const base64 = await blobToBase64(blob);
+    dlog('Base64 OK, tamanho: ' + base64.length + ' chars');
     const p = state.profiles[state.activeProfile];
+    dlog('Enviando para Gemini... URL key: ' + getGeminiKey().slice(0,12) + '...');
 
     const prompt = `Você é um assistente nutricional e de fitness. Analise este áudio em português e extraia as informações do registro.
 
@@ -801,6 +873,7 @@ Regras: valores numéricos sem unidade. Para treino, calories = kcal GASTAS esti
 
     if (!res.ok) {
       const errText = await res.text();
+      dlog('ERRO Gemini HTTP ' + res.status + ': ' + errText.slice(0, 300));
       if (res.status === 400 && errText.includes('API_KEY')) {
         throw new Error('API_KEY_INVALID');
       }
@@ -808,7 +881,9 @@ Regras: valores numéricos sem unidade. Para treino, calories = kcal GASTAS esti
     }
 
     const data = await res.json();
+    dlog('Resposta Gemini OK');
     const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    dlog('Raw JSON: ' + raw.slice(0, 200));
     const entry = JSON.parse(raw.replace(/```json|```/g, '').trim());
     entry.time = nowTime(); entry.id = Date.now();
     const key = getEntryKey();
@@ -820,7 +895,7 @@ Regras: valores numéricos sem unidade. Para treino, calories = kcal GASTAS esti
     showToast((emoji[entry.type] || '✅') + ' Registro salvo!');
   } catch (err) {
     document.getElementById('process-overlay').classList.remove('active');
-    console.error(err);
+    dlog('ERRO processAudio: ' + err.name + ' — ' + err.message);
     if (err.message === 'API_KEY_INVALID') {
       showToast('❌ Chave API inválida. Verifique em Configurações.', 4000);
     } else if (err.message === 'Áudio muito curto') {
