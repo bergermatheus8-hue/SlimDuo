@@ -450,7 +450,7 @@ async function testApiKey() {
   showToast('🧪 Testando chave...', 4000);
   dlog('Testando chave: ' + k.slice(0,12) + '...');
   try {
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=' + k;
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-06-17:generateContent?key=' + k;
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -477,7 +477,7 @@ function getGeminiKey() {
 }
 function getGeminiUrl() {
   const k = getGeminiKey();
-  return 'https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key=' + k;
+  return 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-06-17:generateContent?key=' + k;
 }
 
 const state = {
@@ -685,25 +685,21 @@ function updateDailyStats() {
   aEl.classList.toggle('done',water>=3); aEl.textContent=water>=3?'✓':'✗';
 }
 
-// ── AUDIO RECORDING — compatível com Safari/iOS ──
-// O Safari exige que getUserMedia seja chamado DIRETAMENTE dentro do handler de toque.
-// Não pode haver await antes de getUserMedia dentro do mesmo handler.
-// Solução: o botão FAB chama startRecording() sincronamente via touchend/click.
+// ── WEB SPEECH API + GEMINI TEXTO ──
+// Etapa 1: Web Speech API transcreve o áudio para texto (grátis, nativo do iOS/Safari)
+// Etapa 2: Gemini recebe só o texto e calcula calorias/macros (muito menos tokens)
 
 function initFab() {
   const fab = document.getElementById('fab-btn');
   const stopBtn = document.getElementById('record-stop-btn');
 
-  // Usa touchend no iOS para garantir que é um gesto do usuário
   fab.addEventListener('touchend', function(e) {
     e.preventDefault();
     startRecording();
   }, { passive: false });
 
-  // Fallback para desktop (click normal)
   fab.addEventListener('click', function(e) {
-    // Evita duplo disparo no mobile (touchend já foi tratado)
-    if (e.detail === 0) return; // touchend simula click com detail=0 em alguns browsers
+    if (e.detail === 0) return;
     startRecording();
   });
 
@@ -718,79 +714,32 @@ function initFab() {
   });
 }
 
-async function startRecording() {
+function startRecording() {
   if (!getGeminiKey()) {
     showToast('⚠️ Configure a API Key em Configurações primeiro!', 3500);
     return;
   }
 
-  // Limpa estado anterior
-  state.audioChunks = [];
-  state.recorder = null;
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    showToast('❌ Seu navegador não suporta reconhecimento de voz.', 4000);
+    dlog('ERRO: SpeechRecognition não disponível neste browser');
+    return;
+  }
 
-  try {
-    dlog('Iniciando gravação...');
-    // getUserMedia precisa ser chamado aqui, direto no handler de toque
-    const constraints = {
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        sampleRate: 44100
-      }
-    };
+  dlog('Iniciando Web Speech API...');
+  state.transcript = '';
+  state.recognition = new SpeechRecognition();
+  state.recognition.lang = 'pt-BR';
+  state.recognition.continuous = true;
+  state.recognition.interimResults = true;
+  state.recognition.maxAlternatives = 1;
 
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    state.audioStream = stream;
-    dlog('Stream obtido. Tracks: ' + stream.getTracks().length);
-
-    // Detecta o melhor formato suportado (Safari usa audio/mp4)
-    let mimeType = '';
-    const types = [
-      'audio/mp4',
-      'audio/webm;codecs=opus',
-      'audio/webm',
-      'audio/ogg;codecs=opus',
-      ''
-    ];
-    for (const t of types) {
-      if (t === '' || MediaRecorder.isTypeSupported(t)) {
-        mimeType = t;
-        break;
-      }
-    }
-
-    const opts = mimeType ? { mimeType } : {};
-    dlog('MimeType selecionado: "' + mimeType + '"');
-    state.recorder = new MediaRecorder(stream, opts);
-
-    state.recorder.ondataavailable = (e) => {
-      if (e.data && e.data.size > 0) {
-        state.audioChunks.push(e.data);
-        dlog('Chunk recebido: ' + e.data.size + ' bytes');
-      }
-    };
-
-    state.recorder.onstop = () => {
-      dlog('Gravação encerrada. Total chunks: ' + state.audioChunks.length);
-      // Para todas as tracks do stream
-      stream.getTracks().forEach(t => t.stop());
-      processAudio();
-    };
-
-    state.recorder.onerror = (e) => {
-      dlog('ERRO MediaRecorder: ' + JSON.stringify(e.error));
-      showToast('❌ Erro na gravação. Tente novamente.', 3000);
-      stopRecording();
-    };
-
-    // Coleta dados a cada 500ms (mais compatível com Safari)
-    state.recorder.start(500);
-
-    // Mostra overlay
+  state.recognition.onstart = () => {
+    dlog('Reconhecimento iniciado');
     document.getElementById('record-overlay').classList.add('active');
+    document.getElementById('record-time').textContent = '🎙️';
     state.recordSeconds = 0;
-    document.getElementById('record-time').textContent = '0:00';
-
     state.recordTimer = setInterval(() => {
       state.recordSeconds++;
       const m = Math.floor(state.recordSeconds / 60);
@@ -798,75 +747,97 @@ async function startRecording() {
       document.getElementById('record-time').textContent = m + ':' + String(s).padStart(2, '0');
       if (state.recordSeconds >= 120) stopRecording();
     }, 1000);
+  };
 
-  } catch (err) {
-    dlog('ERRO ao iniciar gravação: ' + err.name + ' — ' + err.message);
-    let msg = '❌ Permita o acesso ao microfone nas configurações!';
-    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-      msg = '❌ Acesso ao microfone negado. Vá em Ajustes > Safari > Microfone.';
-    } else if (err.name === 'NotFoundError') {
-      msg = '❌ Nenhum microfone encontrado no dispositivo.';
+  state.recognition.onresult = (e) => {
+    let interim = '';
+    let final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += t;
+      else interim += t;
     }
-    showToast(msg, 4000);
+    if (final) state.transcript += final;
+    // Mostra o texto sendo reconhecido em tempo real
+    const hint = document.querySelector('.record-hint');
+    if (hint) hint.textContent = state.transcript || interim || 'Fale agora...';
+    dlog('Transcrito: ' + (state.transcript + interim).slice(0, 100));
+  };
+
+  state.recognition.onerror = (e) => {
+    dlog('ERRO SpeechRecognition: ' + e.error);
+    if (e.error === 'not-allowed') {
+      showToast('❌ Permita o microfone em Ajustes > Safari > Microfone', 4000);
+    } else if (e.error === 'no-speech') {
+      showToast('⚠️ Nenhuma fala detectada. Tente novamente.', 3000);
+    } else {
+      showToast('❌ Erro: ' + e.error, 3000);
+    }
+    stopRecording();
+  };
+
+  state.recognition.onend = () => {
+    dlog('Recognition ended. Transcript: ' + state.transcript);
+    clearInterval(state.recordTimer);
+    document.getElementById('record-overlay').classList.remove('active');
+    // Restaura hint original
+    const hint = document.querySelector('.record-hint');
+    if (hint) hint.textContent = 'Fale o que comeu, treinou ou bebeu.\nEx: "Almocei 2 colheres de arroz e 100g de frango"\nEx: "Treinei 1h de musculação — costas e bíceps"\nEx: "Bebi 1 litro e meio de água"';
+    if (state.transcript.trim()) {
+      processText(state.transcript.trim());
+    } else {
+      showToast('⚠️ Nenhum texto reconhecido. Fale mais devagar.', 3000);
+    }
+  };
+
+  try {
+    state.recognition.start();
+  } catch(e) {
+    dlog('ERRO ao iniciar recognition: ' + e.message);
+    showToast('❌ Erro ao iniciar microfone: ' + e.message, 3500);
   }
 }
 
 function stopRecording() {
   clearInterval(state.recordTimer);
-  document.getElementById('record-overlay').classList.remove('active');
-  if (state.recorder && state.recorder.state !== 'inactive') {
-    state.recorder.stop();
-  } else {
-    // Se o recorder nem chegou a iniciar, para o stream se existir
-    if (state.audioStream) {
-      state.audioStream.getTracks().forEach(t => t.stop());
-      state.audioStream = null;
-    }
+  if (state.recognition) {
+    try { state.recognition.stop(); } catch(e) {}
   }
+  document.getElementById('record-overlay').classList.remove('active');
 }
 
-// ── GEMINI ──
-async function processAudio() {
-  if (state.audioChunks.length === 0) {
-    dlog('ERRO: Nenhum chunk de áudio capturado');
-    showToast('❌ Nenhum áudio capturado. Tente novamente.', 3000);
-    return;
-  }
-
+// ── GEMINI — recebe só TEXTO ──
+async function processText(transcript) {
   document.getElementById('process-overlay').classList.add('active');
+  const p = state.profiles[state.activeProfile];
+  dlog('Enviando texto para Gemini: "' + transcript + '"');
+  dlog('Chave: ' + getGeminiKey().slice(0, 12) + '...');
+
+  const prompt = `Você é um assistente nutricional e de fitness. Analise o texto abaixo em português e extraia as informações do registro de saúde.
+
+Texto: "${transcript}"
+
+Contexto do usuário: ${p.gender==='M'?'Homem':'Mulher'}, ${p.age} anos, ${p.weight}kg, ${p.height}cm.
+
+Retorne APENAS JSON válido, sem markdown, sem texto extra, sem explicações. Use exatamente uma destas estruturas:
+
+REFEIÇÃO: {"type":"meal","transcript":"texto original resumido","calories":NUM,"protein":NUM,"carbs":NUM,"fat":NUM,"meal_name":"nome da refeição"}
+TREINO: {"type":"workout","transcript":"texto original resumido","calories":NUM,"duration":NUM,"type_workout":"Musculação/Corrida/Caminhada/Yoga/etc","intensity":"Leve/Moderado/Intenso","muscles":"grupos musculares trabalhados"}
+ÁGUA: {"type":"water","transcript":"texto original resumido","liters":NUM}
+OUTRO: {"type":"other","transcript":"texto original resumido","note":"resumo do registro"}
+
+Regras importantes:
+- Valores numéricos sem unidade (só o número)
+- Para treino, calories = kcal GASTAS estimadas com base no peso do usuário, duração e intensidade
+- Valores desconhecidos = null
+- Responda SOMENTE o JSON, nada mais`;
+
   try {
-    const mimeType = state.recorder?.mimeType || 'audio/mp4';
-    const blob = new Blob(state.audioChunks, { type: mimeType });
-    dlog('Blob criado: ' + blob.size + ' bytes, tipo: ' + blob.type);
-
-    // Verifica tamanho mínimo
-    if (blob.size < 1000) {
-      throw new Error('Áudio muito curto');
-    }
-
-    const base64 = await blobToBase64(blob);
-    dlog('Base64 OK, tamanho: ' + base64.length + ' chars');
-    const p = state.profiles[state.activeProfile];
-    dlog('Enviando para Gemini... URL key: ' + getGeminiKey().slice(0,12) + '...');
-
-    const prompt = `Você é um assistente nutricional e de fitness. Analise este áudio em português e extraia as informações do registro.
-
-Contexto: ${p.gender==='M'?'Homem':'Mulher'}, ${p.age} anos, ${p.weight}kg, ${p.height}cm.
-
-Retorne APENAS JSON válido, sem markdown, sem texto extra. Use esta estrutura:
-
-REFEIÇÃO: {"type":"meal","transcript":"o que foi dito","calories":NUM,"protein":NUM,"carbs":NUM,"fat":NUM,"meal_name":"nome"}
-TREINO: {"type":"workout","transcript":"o que foi dito","calories":NUM,"duration":NUM,"type_workout":"Musculação/Corrida/etc","intensity":"Leve/Moderado/Intenso","muscles":"grupos musculares"}
-ÁGUA: {"type":"water","transcript":"o que foi dito","liters":NUM}
-OUTRO: {"type":"other","transcript":"o que foi dito","note":"resumo"}
-
-Regras: valores numéricos sem unidade. Para treino, calories = kcal GASTAS estimadas. Valores desconhecidos = null. Responda SOMENTE o JSON.`;
-
     const res = await fetch(getGeminiUrl(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mimeType, data: base64 } }] }],
+        contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.1, maxOutputTokens: 512 }
       })
     });
@@ -895,24 +866,15 @@ Regras: valores numéricos sem unidade. Para treino, calories = kcal GASTAS esti
     showToast((emoji[entry.type] || '✅') + ' Registro salvo!');
   } catch (err) {
     document.getElementById('process-overlay').classList.remove('active');
-    dlog('ERRO processAudio: ' + err.name + ' — ' + err.message);
+    dlog('ERRO processText: ' + err.name + ' — ' + err.message);
     if (err.message === 'API_KEY_INVALID') {
       showToast('❌ Chave API inválida. Verifique em Configurações.', 4000);
-    } else if (err.message === 'Áudio muito curto') {
-      showToast('❌ Áudio muito curto. Fale por pelo menos 2 segundos.', 3000);
+    } else if (res && res.status === 429) {
+      showToast('⚠️ Cota do Gemini esgotada. Tente novamente em alguns minutos.', 4000);
     } else {
-      showToast('❌ Erro ao processar. Tente novamente.', 3000);
+      showToast('❌ Erro ao processar. Veja o log em Configurações.', 3000);
     }
   }
-}
-
-function blobToBase64(blob) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result.split(',')[1]);
-    r.onerror = rej;
-    r.readAsDataURL(blob);
-  });
 }
 
 // ── STORAGE ──
